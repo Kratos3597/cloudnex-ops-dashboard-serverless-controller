@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 🧠 REQUIRED FOR NATIVE CLICK & CYBERNETIC FEEDBACK SOUNDS
+import 'package:flutter/services.dart'; // Handles native click & cybernetic feedback sounds
 import 'package:provider/provider.dart';
 import 'services/dashboard_provider.dart';
 
@@ -129,9 +129,15 @@ class _BootSequenceWrapperState extends State<BootSequenceWrapper> with TickerPr
                         ),
                         Text(
                           ' OS',
-                          style: TextStyle(color: const Color(0xFF00F0FF), fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'monospace', boxShadow: [
-                            BoxShadow(color: const Color(0xFF00F0FF).withOpacity(0.5), blurRadius: 8)
-                          ]),
+                          style: TextStyle(
+                            color: const Color(0xFF00F0FF), 
+                            fontSize: 22, 
+                            fontWeight: FontWeight.bold, 
+                            fontFamily: 'monospace', 
+                            shadows: [ // 🧠 FIXED: Changed from boxShadow to shadows for TextStyle compatibility
+                              Shadow(color: const Color(0xFF00F0FF).withOpacity(0.5), blurRadius: 8)
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -205,9 +211,8 @@ class AdminCenterShell extends StatefulWidget {
 
 class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerProviderStateMixin {
   
-  // 🎵 CYBERNETIC SOUND EXECUTOR MODULE
+  // Cybernetic Sound Executor Module
   void _playTerminalChime() {
-    // Triggers native mechanical clicks and micro haptic buzzes simultaneously
     SystemSound.play(SystemSoundType.click);
     HapticFeedback.lightImpact();
   }
@@ -261,7 +266,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
 
     return Scaffold(
       backgroundColor: const Color(0xFF090D16),
-      // 🛡️ ROOT-LEVEL SAFETY SHIELD: Permanently isolates entire layout past the hardware status bar
+      // 🛡️ SAFE AREA INTERCEPTOR: Perfectly isolates layouts past mobile status bar frames
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -332,7 +337,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                             ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 1.5, color: Color(0xFF00F0FF)))
                             : const Icon(Icons.refresh, color: Color(0xFF9CA3AF), size: 16),
                         onPressed: () {
-                          _playTerminalChime(); // 🎵 Sound effect triggered on tap
+                          _playTerminalChime(); 
                           provider.refreshDashboard();
                         },
                       ),
@@ -342,7 +347,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                 Expanded(
                   child: Row(
                     children: [
-                      // Left Structural Menu Rail
+                      // Left Menu Access Rail
                       Container(
                         width: isTablet ? 56 : 48,
                         color: const Color(0xFF05070C),
@@ -361,7 +366,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                         ),
                       ),
 
-                      // Core Panel Content Box
+                      // Main Core Workspace Viewport Switcher
                       Expanded(
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 350),
@@ -370,11 +375,10 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                           child: KeyedSubtree(
                             key: ValueKey<String>(provider.activeConsole),
                             child: _buildConsoleWorkspace(provider.activeConsole, metrics, provider, isTablet, isDesktop, consoleAccent),
-                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -473,7 +477,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
             itemBuilder: (context, index) {
               final log = provider.infrastructureLogs[index];
               return InkWell(
-                onTap: () => _playTerminalChime(), // 🎵 Add click sound to interactive log nodes
+                onTap: () => _playTerminalChime(), 
                 child: ListTile(
                   dense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -557,7 +561,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
       _buildCyberCard('SYS_CAT_03 // CONNECT MATRIX', 'Delta Sync Synchronization Engine Pipeline', Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.cloud_sync_rounded, size: 28, color: Color(0xFF00F0FF)),
+          const Icon(Icons.cloud_sync_rounded, size: 28, color: Color(0xFF0078D4)),
           const SizedBox(height: 4),
           Text('SYNC TOPOLOGY: NOMINAL', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF00F0FF)), overflow: TextOverflow.ellipsis),
         ],
@@ -637,7 +641,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
 
   Widget _buildCyberCard(String headerCode, String description, Widget internalNode) {
     return InkWell(
-      onTap: () => _playTerminalChime(), // 🎵 Click sound when grid cards are selected
+      onTap: () => _playTerminalChime(), 
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF111827).withOpacity(0.9), 
@@ -673,7 +677,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
       preferBelow: false,
       child: InkWell(
         onTap: () {
-          _playTerminalChime(); // 🎵 Click sound when tab selection changes
+          _playTerminalChime(); 
           provider.changeConsole(consoleId);
         },
         child: Container(
