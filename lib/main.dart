@@ -243,7 +243,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF323130), letterSpacing: -0.5),
                 ),
                 Text(
-                  'Directory Scope Scope ID: ${metrics["tenantId"]}',
+                  'Directory Scope ID: ${metrics["tenantId"]}',
                   style: const TextStyle(fontSize: 11, color: Color(0xFF797775)),
                 ),
               ],
@@ -367,7 +367,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           ],
         ), borderHighlight: const Color(0xFF0078D4)),
         _buildHighDensityCard('Application Security Registry', 'Enterprise OAuth App Registrations & Client Tokens', Column(
-          mainAxisAlignment: Main => System Profiles
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(metrics["entraId"]["appRegistrations"].toString(), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
             const Text('All Graph API Client Tokens Valid', style: TextStyle(fontSize: 11, color: Color(0xFF605E5C))),
