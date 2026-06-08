@@ -12,7 +12,7 @@ void main() {
 }
 
 // =========================================================================
-// 🛡️ THE NEW FIX: COMPILER-SAFE CONTAINERS TO ELIMINATE ASSERTION CRASHES
+// 🛡️ COMPILER-SAFE CONTAINER ENGINES
 // =========================================================================
 class SafeContainer extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
@@ -34,12 +34,10 @@ class SafeContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If a decoration exists, we safely absorb the top-level color into it
     BoxDecoration? finalDecoration = decoration;
     if (color != null) {
       finalDecoration = (decoration ?? const BoxDecoration()).copyWith(color: color);
     }
-
     return Container(
       width: width,
       height: height,
@@ -76,7 +74,6 @@ class SafeAnimatedContainer extends StatelessWidget {
     if (color != null) {
       finalDecoration = (decoration ?? const BoxDecoration()).copyWith(color: color);
     }
-
     return AnimatedContainer(
       duration: duration,
       width: width,
@@ -89,7 +86,7 @@ class SafeAnimatedContainer extends StatelessWidget {
 }
 
 // =========================================================================
-// MAIN APPLICATION LAYOUT
+// CORE RESPONSIVE LAYOUT ENGINE W/ BRANDING
 // =========================================================================
 class M365AdminCenterApp extends StatelessWidget {
   const M365AdminCenterApp({super.key});
@@ -149,7 +146,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
       );
     }
 
-    bool isDesktop = MediaQuery.of(context).size.width > 850;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isTablet = screenWidth >= 650;
+    final bool isDesktop = screenWidth >= 1000;
 
     Color consoleAccent;
     Color topBarColor;
@@ -159,27 +158,27 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
       case 'Entra':
         consoleAccent = const Color(0xFF0078D4);
         topBarColor = const Color(0xFF11171F);
-        consoleTitle = 'Microsoft Entra admin center';
+        consoleTitle = isTablet ? 'Microsoft Entra admin center' : 'Entra Admin';
         break;
       case 'Intune':
         consoleAccent = const Color(0xFF0078D4);
         topBarColor = const Color(0xFF242424);
-        consoleTitle = 'Microsoft Intune admin center';
+        consoleTitle = isTablet ? 'Microsoft Intune admin center' : 'Intune Node';
         break;
       case 'Veeam':
         consoleAccent = const Color(0xFF00B159);
         topBarColor = const Color(0xFF1A1A1A);
-        consoleTitle = 'Veeam Availability Console';
+        consoleTitle = isTablet ? 'Veeam Availability Console' : 'Veeam Core';
         break;
       case 'Azure':
         consoleAccent = const Color(0xFF008AD7);
         topBarColor = const Color(0xFF004578);
-        consoleTitle = 'Microsoft Azure Portal';
+        consoleTitle = isTablet ? 'Microsoft Azure Portal' : 'Azure Cloud';
         break;
       default:
         consoleAccent = const Color(0xFF0078D4);
         topBarColor = const Color(0xFF004578);
-        consoleTitle = 'Microsoft 365 admin center';
+        consoleTitle = isTablet ? 'Microsoft 365 admin center' : 'M365 Admin';
     }
 
     return Scaffold(
@@ -214,21 +213,64 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           ),
           Column(
             children: [
+              // --- ADAPTIVE NAVIGATION HEADER CONSOLE ---
               SafeAnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 48,
                 color: topBarColor,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.apps, color: Colors.white, size: 20),
-                    const SizedBox(width: 16),
+                    // 📍 CLOUDNEX LIVE BRAND IMAGE LOGO REPLACEMENT
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.network(
+                        'https://cloudnex.co.za/assets/img/logo.png', // Pulls straight from your live portfolio web host asset pool
+                        height: 24,
+                        width: 24,
+                        fit: BoxFit.contain,
+                        // High-Fidelity Network Fallback Logic if Offline or Server Tunnels change
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: consoleAccent.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'CN',
+                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.5)),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 250),
                       child: Text(
                         consoleTitle,
                         key: ValueKey(consoleTitle),
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: -0.1),
+                        style: TextStyle(
+                          color: Colors.white, 
+                          fontSize: isTablet ? 14 : 13, 
+                          fontWeight: FontWeight.w600, 
+                          letterSpacing: -0.1
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -245,7 +287,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                 child: Row(
                   children: [
                     SafeContainer(
-                      width: 56,
+                      width: isTablet ? 56 : 48,
                       color: Colors.white,
                       decoration: const BoxDecoration(
                         border: Border(right: BorderSide(color: Color(0xFFEDEBE9), width: 1)),
@@ -253,11 +295,11 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                       child: Column(
                         children: [
                           const SizedBox(height: 12),
-                          _buildConsoleRailButton(context, 'M365', Icons.dashboard_customize_outlined, 'M365 Admin Center', consoleAccent),
-                          _buildConsoleRailButton(context, 'Entra', Icons.badge_outlined, 'Entra ID Management', consoleAccent),
-                          _buildConsoleRailButton(context, 'Intune', Icons.phonelink_setup_outlined, 'Intune Device Node', consoleAccent),
-                          _buildConsoleRailButton(context, 'Veeam', Icons.shield_outlined, 'Veeam Backup Core', consoleAccent),
-                          _buildConsoleRailButton(context, 'Azure', Icons.cloud_done_outlined, 'Azure Infrastructure', consoleAccent),
+                          _buildConsoleRailButton(context, 'M365', Icons.dashboard_customize_outlined, 'M365', consoleAccent, isTablet),
+                          _buildConsoleRailButton(context, 'Entra', Icons.badge_outlined, 'Entra ID', consoleAccent, isTablet),
+                          _buildConsoleRailButton(context, 'Intune', Icons.phonelink_setup_outlined, 'Intune', consoleAccent, isTablet),
+                          _buildConsoleRailButton(context, 'Veeam', Icons.shield_outlined, 'Veeam', consoleAccent, isTablet),
+                          _buildConsoleRailButton(context, 'Azure', Icons.cloud_done_outlined, 'Azure', consoleAccent, isTablet),
                         ],
                       ),
                     ),
@@ -280,7 +322,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                         },
                         child: KeyedSubtree(
                           key: ValueKey<String>(provider.activeConsole),
-                          child: _buildConsoleWorkspace(provider.activeConsole, metrics, provider, isDesktop),
+                          child: _buildConsoleWorkspace(provider.activeConsole, metrics, provider, screenWidth, isTablet, isDesktop),
                         ),
                       ),
                     ),
@@ -294,47 +336,79 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  Widget _buildConsoleWorkspace(String console, Map<String, dynamic> metrics, DashboardProvider provider, bool isDesktop) {
+  Widget _buildConsoleWorkspace(String console, Map<String, dynamic> metrics, DashboardProvider provider, double screenWidth, bool isTablet, bool isDesktop) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 32 : 16, 
+        vertical: isTablet ? 24 : 16
+      ),
       children: [
         Row(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  metrics["tenantName"] ?? 'CloudNex Solutions',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF323130), letterSpacing: -0.5),
-                ),
-                Text(
-                  'Directory Scope ID: ${metrics["tenantId"]}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF797775)),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    metrics["tenantName"] ?? 'CloudNex Solutions',
+                    style: TextStyle(
+                      fontSize: isTablet ? 22 : 18, 
+                      fontWeight: FontWeight.bold, 
+                      color: const Color(0xFF323130), 
+                      letterSpacing: -0.5
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Scope ID: ${metrics["tenantId"]}',
+                    style: TextStyle(fontSize: isTablet ? 11 : 9, color: const Color(0xFF797775)),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             _buildPulseStatusIndicator(),
           ],
         ),
         const SizedBox(height: 24),
-        if (console == 'M365') ...[
-          _buildM365Workspace(metrics, isDesktop),
-        ] else if (console == 'Entra') ...[
-          _buildEntraWorkspace(metrics, isDesktop),
-        ] else if (console == 'Intune') ...[
-          _buildIntuneWorkspace(metrics, isDesktop),
-        ] else if (console == 'Veeam') ...[
-          _buildVeeamWorkspace(metrics, isDesktop),
-        ] else if (console == 'Azure') ...[
-          _buildAzureWorkspace(metrics, isDesktop),
-        ],
+
+        LayoutBuilder(
+          builder: (context, constraints) {
+            int gridCount = 1;
+            if (isDesktop) {
+              gridCount = 3;
+            } else if (isTablet) {
+              gridCount = 2;
+            }
+
+            double cardAspectRatio = isTablet ? 1.4 : 1.6;
+
+            return GridView.count(
+              crossAxisCount: gridCount,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: cardAspectRatio,
+              children: [
+                if (console == 'M365') ..._buildM365Cards(metrics),
+                if (console == 'Entra') ..._buildEntraCards(metrics),
+                if (console == 'Intune') ..._buildIntuneCards(metrics),
+                if (console == 'Veeam') ..._buildVeeamCards(metrics),
+                if (console == 'Azure') ..._buildAzureCards(metrics),
+              ],
+            );
+          },
+        ),
+
         const SizedBox(height: 32),
-        const Text(
+        Text(
           'Tenant Infrastructure Live Audit Stream',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF323130)),
+          style: TextStyle(fontSize: isTablet ? 14 : 12, fontWeight: FontWeight.bold, color: const Color(0xFF323130)),
         ),
         const SizedBox(height: 12),
+
         SafeContainer(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -350,10 +424,23 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
               final log = provider.infrastructureLogs[index];
               return ListTile(
                 dense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 leading: const Icon(Icons.security_update_good_outlined, color: Color(0xFF0078D4), size: 16),
-                title: Text(log["event"], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Color(0xFF323130))),
-                subtitle: Text(log["details"], style: const TextStyle(fontSize: 11, color: Color(0xFF605E5C))),
-                trailing: Text(log["timestamp"], style: const TextStyle(fontSize: 10, color: Color(0xFFA19F9D))),
+                title: Text(
+                  log["event"], 
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: isTablet ? 12 : 11, color: const Color(0xFF323130)),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  log["details"], 
+                  style: TextStyle(fontSize: isTablet ? 11 : 10, color: const Color(0xFF605E5C)),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Text(
+                  log["timestamp"], 
+                  style: const TextStyle(fontSize: 9, color: Color(0xFFA19F9D)),
+                ),
               );
             },
           ),
@@ -362,183 +449,159 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  Widget _buildM365Workspace(Map<String, dynamic> metrics, bool isDesktop) {
-    return GridView.count(
-      crossAxisCount: isDesktop ? 3 : 1,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: [
-        _buildHighDensityCard('Hybrid Compute & Storage Pools', 'Local Datacenter Cluster Optimization', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${metrics["serverSpace"]["usedTB"]} / ${metrics["serverSpace"]["totalTB"]} TB Allocated', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                const Text('Healthy Status', style: TextStyle(color: Color(0xFF107C41), fontSize: 11, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(value: metrics["serverSpace"]["usedTB"] / metrics["serverSpace"]["totalTB"], color: const Color(0xFF0078D4), backgroundColor: const Color(0xFFEDEBE9)),
-          ],
-        )),
-        _buildHighDensityCard('Identity Cloud Topology', 'Entra ID Domain Federation Engine', Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildMetricBlock(metrics["entraId"]["users"].toString(), 'Active Directory Objects'),
-            _buildMetricBlock(metrics["entraId"]["groups"].toString(), 'Federated Groups'),
-          ],
-        )),
-        _buildHighDensityCard('Global Tenant Defense Summary', 'Microsoft Secure Score Metrics', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('${metrics["securityScore"]["current"]}%', style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Color(0xFF107C41))),
-            const Text('Security Profile Optimization Active', style: TextStyle(fontSize: 11, color: Color(0xFF605E5C))),
-          ],
-        )),
-      ],
-    );
-  }
-
-  Widget _buildEntraWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
-    return GridView.count(
-      crossAxisCount: isDesktop ? 3 : 1,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: [
-        _buildHighDensityCard('Identity Risk & Attack Surface', 'Conditional Access Real-Time Mitigations', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(metrics["entraId"]["riskyUsers"].toString(), style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold, color: Color(0xFF107C41))),
-            const Text('Zero Flagged Identity Threats Active', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF107C41))),
-          ],
-        ), borderHighlight: const Color(0xFF0078D4)),
-        _buildHighDensityCard('Application Security Registry', 'Enterprise OAuth App Registrations Tokens', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(metrics["entraId"]["appRegistrations"].toString(), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
-            const Text('All Graph API Client Tokens Valid', style: TextStyle(fontSize: 11, color: Color(0xFF605E5C))),
-          ],
-        ), borderHighlight: const Color(0xFF0078D4)),
-        _buildHighDensityCard('Directory Replication Pipelines', 'Microsoft Entra Connect Sync Engine', const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.cloud_sync_rounded, size: 36, color: Color(0xFF0078D4)),
-            SizedBox(height: 4),
-            Text('Delta Sync Cycle Completed: In Sync', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-          ],
-        ), borderHighlight: const Color(0xFF0078D4)),
-      ],
-    );
-  }
-
-  Widget _buildIntuneWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
-    return GridView.count(
-      crossAxisCount: isDesktop ? 3 : 1,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: [
-        _buildHighDensityCard('MDM Profile Compliance', 'Corporate Device Policy Matrices', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Compliant: ${metrics["intune"]["compliantDevices"]}', style: const TextStyle(color: Color(0xFF107C41), fontWeight: FontWeight.bold, fontSize: 12)),
-                Text('Halt/Alert: ${metrics["intune"]["nonCompliant"]}', style: const TextStyle(color: Color(0xFFA80000), fontWeight: FontWeight.bold, fontSize: 12)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: metrics["intune"]["compliantDevices"] / metrics["intune"]["totalDevices"],
-                color: const Color(0xFF107C41),
-                backgroundColor: const Color(0xFFA80000),
-                minHeight: 6,
+  List<Widget> _buildM365Cards(Map<String, dynamic> metrics) {
+    return [
+      _buildHighDensityCard('Hybrid Compute & Storage Pools', 'Local Datacenter Cluster Optimization', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${metrics["serverSpace"]["usedTB"]} / ${metrics["serverSpace"]["totalTB"]} TB Allocated', 
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            )
-          ],
-        )),
-        _buildHighDensityCard('Managed Endpoint OS Spread', 'Platform OS Distribution Registry', Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildMetricBlock(metrics["intune"]["windows"].toString(), 'Windows 11'),
-            _buildMetricBlock(metrics["intune"]["iOS"].toString(), 'Apple iOS'),
-            _buildMetricBlock(metrics["intune"]["android"].toString(), 'Android Ent'),
-          ],
-        )),
-      ],
-    );
+              const SizedBox(width: 4),
+              const Text('Healthy', style: TextStyle(color: Color(0xFF107C41), fontSize: 10, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(value: metrics["serverSpace"]["usedTB"] / metrics["serverSpace"]["totalTB"], color: const Color(0xFF0078D4), backgroundColor: const Color(0xFFEDEBE9)),
+        ],
+      )),
+      _buildHighDensityCard('Identity Cloud Topology', 'Entra ID Domain Federation Engine', Row(
+        children: [
+          Expanded(child: _buildMetricBlock(metrics["entraId"]["users"].toString(), 'AD Objects')),
+          Container(width: 1, height: 24, color: const Color(0xFFEDEBE9)),
+          Expanded(child: _buildMetricBlock(metrics["entraId"]["groups"].toString(), 'Federated')),
+        ],
+      )),
+      _buildHighDensityCard('Global Tenant Defense Summary', 'Microsoft Secure Score Metrics', Column(
+        mainAxisAlignment: Main => System Profiles
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('${metrics["securityScore"]["current"]}%', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF107C41))),
+          ),
+          const Text('Optimization Active', style: TextStyle(fontSize: 10, color: Color(0xFF605E5C)), overflow: TextOverflow.ellipsis),
+        ],
+      )),
+    ];
   }
 
-  Widget _buildVeeamWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
-    return GridView.count(
-      crossAxisCount: isDesktop ? 3 : 1,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: [
-        _buildHighDensityCard('Immutable Replication Security', 'Veeam Backup Cluster Integrity Status', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('${metrics["veeam"]["successRate"]}%', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Color(0xFF00B159))),
-            const Text('Synthetic Full Backups Verified (24h Window)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
-          ],
-        ), borderHighlight: const Color(0xFF00B159)),
-        _buildHighDensityCard('Scale-Out Storage Repositories', 'Veeam SOBR Arrays Capacity Pools', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${metrics["veeam"]["sobrCapacity"]}% Volume Capacity Pool Used', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(value: metrics["veeam"]["sobrCapacity"] / 100, color: const Color(0xFF00B159), backgroundColor: const Color(0xFFEDEBE9)),
-          ],
-        ), borderHighlight: const Color(0xFF00B159)),
-      ],
-    );
+  List<Widget> _buildEntraCards(Map<String, dynamic> metrics) {
+    return [
+      _buildHighDensityCard('Identity Risk Vector', 'Conditional Access Real-Time Mitigations', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(metrics["entraId"]["riskyUsers"].toString(), style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF107C41))),
+          const Text('Zero Flagged Threats', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF107C41)), overflow: TextOverflow.ellipsis),
+        ],
+      ), borderHighlight: const Color(0xFF0078D4)),
+      _buildHighDensityCard('Application Security Registry', 'Enterprise OAuth App Registrations', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(metrics["entraId"]["appRegistrations"].toString(), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
+          const Text('Graph API Tokens Valid', style: TextStyle(fontSize: 10, color: Color(0xFF605E5C)), overflow: TextOverflow.ellipsis),
+        ],
+      ), borderHighlight: const Color(0xFF0078D4)),
+      _buildHighDensityCard('Directory Replication Pipelines', 'Microsoft Entra Connect Engine', const Column(
+        mainAxisAlignment: Main => Systems Setup
+        children: [
+          Icon(Icons.cloud_sync_rounded, size: 28, color: Color(0xFF0078D4)),
+          SizedBox(height: 4),
+          Text('In Sync Topology', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+        ],
+      ), borderHighlight: const Color(0xFF0078D4)),
+    ];
   }
 
-  Widget _buildAzureWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
-    return GridView.count(
-      crossAxisCount: isDesktop ? 3 : 1,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: [
-        _buildHighDensityCard('Virtual Infrastructure Cluster', 'Azure Compute Engine Resource Groups', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('${metrics["azure"]["activeVMs"]} Active Running Hosts', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF008AD7))),
-            const Text('All Hyper-V Virtual Machines Reporting Nominal', style: TextStyle(fontSize: 11, color: Color(0xFF605E5C))),
-          ],
-        ), borderHighlight: const Color(0xFF008AD7)),
-        _buildHighDensityCard('Cloud Tenant Consumption Ledger', 'Azure Cost Management Burn Optimization', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(metrics["azure"]["monthlyBurn"], style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF323130))),
-            const Text('Metered Resource Group Allocation Profile', style: TextStyle(fontSize: 11, color: Color(0xFF797775))),
-          ],
-        ), borderHighlight: const Color(0xFF008AD7)),
-      ],
-    );
+  List<Widget> _buildIntuneCards(Map<String, dynamic> metrics) {
+    return [
+      _buildHighDensityCard('MDM Profile Compliance', 'Corporate Device Policy Matrices', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Compliant: ${metrics["intune"]["compliantDevices"]}', style: const TextStyle(color: Color(0xFF107C41), fontWeight: FontWeight.bold, fontSize: 11), overflow: TextOverflow.ellipsis),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text('Alert: ${metrics["intune"]["nonCompliant"]}', style: const TextStyle(color: Color(0xFFA80000), fontWeight: FontWeight.bold, fontSize: 11), overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: metrics["intune"]["compliantDevices"] / metrics["intune"]["totalDevices"],
+              color: const Color(0xFF107C41),
+              backgroundColor: const Color(0xFFA80000),
+              minHeight: 5,
+            ),
+          )
+        ],
+      )),
+      _buildHighDensityCard('Managed Endpoint OS Spread', 'Platform OS Distribution Registry', Row(
+        children: [
+          Expanded(child: _buildMetricBlock(metrics["intune"]["windows"].toString(), 'Win 11')),
+          Expanded(child: _buildMetricBlock(metrics["intune"]["iOS"].toString(), 'iOS')),
+          Expanded(child: _buildMetricBlock(metrics["intune"]["android"].toString(), 'Android')),
+        ],
+      )),
+    ];
   }
 
+  List<Widget> _buildVeeamCards(Map<String, dynamic> metrics) {
+    return [
+      _buildHighDensityCard('Immutable Replication Security', 'Veeam Cluster Integrity Status', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('${metrics["veeam"]["successRate"]}%', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF00B159))),
+          const Text('Verified (24h Window)', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+        ],
+      ), borderHighlight: const Color(0xFF00B159)),
+      _buildHighDensityCard('Scale-Out Storage Repositories', 'Veeam SOBR Arrays Capacity Pools', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${metrics["veeam"]["sobrCapacity"]}% Capacity Pool', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(value: metrics["veeam"]["sobrCapacity"] / 100, color: const Color(0xFF00B159), backgroundColor: const Color(0xFFEDEBE9)),
+        ],
+      ), borderHighlight: const Color(0xFF00B159)),
+    ];
+  }
+
+  List<Widget> _buildAzureCards(Map<String, dynamic> metrics) {
+    return [
+      _buildHighDensityCard('Virtual Infrastructure Cluster', 'Azure Compute Engine Resource Groups', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('${metrics["azure"]["activeVMs"]} Active Hosts', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF008AD7))),
+          const Text('Hyper-V Nodes Nominal', style: TextStyle(fontSize: 10, color: Color(0xFF605E5C)), overflow: TextOverflow.ellipsis),
+        ],
+      ), borderHighlight: const Color(0xFF008AD7)),
+      _buildHighDensityCard('Cloud Tenant Consumption Ledger', 'Azure Cost Management Burn Profile', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(metrics["azure"]["monthlyBurn"], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF323130))),
+          ),
+          const Text('Metered Resource Group Allocation', style: TextStyle(fontSize: 10, color: Color(0xFF797775)), overflow: TextOverflow.ellipsis),
+        ],
+      ), borderHighlight: const Color(0xFF008AD7)),
+    ];
+  }
+
+  // --- COMPONENT FACTORY: RESPONSIVE TILES ---
   Widget _buildHighDensityCard(String title, String subtitle, Widget child, {Color? borderHighlight}) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -548,17 +611,14 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           onExit: (_) => setState(() => isHovered = false),
           child: SafeAnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(2),
-              border: Border.all(
-                color: isHovered ? (borderHighlight ?? const Color(0xFF0078D4)) : const Color(0xFFE0E0E0), 
-                width: isHovered ? 1.5 : 1,
-              ),
+              border: Border.all(color: isHovered ? (borderHighlight ?? const Color(0xFF0078D4)) : const Color(0xFFE0E0E0), width: isHovered ? 1.5 : 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isHovered ? 0.05 : 0.01),
+                  color: Colors.black.withOpacity(isHovered ? 0.04 : 0.01),
                   blurRadius: isHovered ? 4 : 1,
                   offset: Offset(0, isHovered ? 2 : 0),
                 ),
@@ -567,9 +627,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF323130))),
-                Text(subtitle, style: const TextStyle(fontSize: 10, color: Color(0xFF797775))),
-                const Divider(height: 12, color: Color(0xFFF3F2F1)),
+                Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF323130)), overflow: TextOverflow.ellipsis),
+                Text(subtitle, style: const TextStyle(fontSize: 9, color: Color(0xFF797775)), overflow: TextOverflow.ellipsis),
+                const Divider(height: 10, color: Color(0xFFF3F2F1)),
                 Expanded(child: child),
               ],
             ),
@@ -579,7 +639,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  Widget _buildConsoleRailButton(BuildContext context, String consoleId, IconData icon, String label, Color highlightColor) {
+  Widget _buildConsoleRailButton(BuildContext context, String consoleId, IconData icon, String label, Color highlightColor, bool isTablet) {
     final provider = Provider.of<DashboardProvider>(context);
     bool isActive = provider.activeConsole == consoleId;
 
@@ -590,13 +650,13 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
         onTap: () => provider.changeConsole(consoleId),
         child: SafeAnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: 56,
-          height: 48,
+          width: isTablet ? 56 : 48,
+          height: isTablet ? 48 : 44,
           decoration: BoxDecoration(
             border: isActive ? Border(left: BorderSide(color: highlightColor, width: 3)) : null,
             color: isActive ? const Color(0xFFEFF6FC) : Colors.transparent,
           ),
-          child: Icon(icon, color: isActive ? highlightColor : const Color(0xFF605E5C), size: 18),
+          child: Icon(icon, color: isActive ? highlightColor : const Color(0xFF605E5C), size: isTablet ? 18 : 16),
         ),
       ),
     );
@@ -631,9 +691,12 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
+        ),
         const SizedBox(height: 1),
-        Text(label, style: const TextStyle(fontSize: 10, color: Color(0xFF605E5C))),
+        Text(label, style: const TextStyle(fontSize: 9, color: Color(0xFF605E5C)), overflow: TextOverflow.ellipsis),
       ],
     );
   }
