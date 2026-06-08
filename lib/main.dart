@@ -348,12 +348,12 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                     children: [
                       // Left Menu Access Rail
                       Container(
-                        width: isTablet ? 56 : 48,
-                        color: const Color(0xFF05070C),
-                        decoration: const BoxDecoration(
-                          border: Border(right: BorderSide(color: Color(0xFF1F2937), width: 1)),
-                        ),
-                        child: Column(
+  width: isTablet ? 56 : 48,
+  decoration: const BoxDecoration(
+    color: Color(0xFF05070C), // <-- ADD IT HERE
+    border: Border(right: BorderSide(color: Color(0xFF1F2937), width: 1)),
+  ),
+  child:Column(
                           children: [
                             const SizedBox(height: 12),
                             _buildConsoleRailButton(context, 'M365', Icons.terminal_outlined, consoleAccent, isTablet),
