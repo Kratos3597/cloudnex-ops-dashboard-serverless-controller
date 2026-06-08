@@ -7,8 +7,8 @@ import '../models/node_metrics_model.dart';
 class ApiService {
   final StorageService _storageService = StorageService();
   
-  // Default fallback pointer matching your serverless gateway
-  final String _fallbackUrl = 'https://portfolio-chat-bridge.Kratos3597.workers.dev';
+  // Pointing directly to your active Cloudflare Worker profile bridge
+  final String _fallbackUrl = 'https://portfolio-chat-bridge.sheikwin10.workers.dev';
 
   /// Helper to get the active URL configuration
   Future<String> _getEffectiveBaseUrl() async {
