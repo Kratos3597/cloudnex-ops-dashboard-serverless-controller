@@ -33,8 +33,8 @@ jobs:
     - name: Build Android APK
       run: flutter build apk --debug
 
-    - name: Upload Build Artifact
+   - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: cloudnex-ops-apk
-        path: build/app/outputs/flutter-apk/app-debug.apk
+        path: build/app/outputs/flutter-apk/*.apk  # <--- Changed to wildcard
