@@ -134,7 +134,7 @@ class _BootSequenceWrapperState extends State<BootSequenceWrapper> with TickerPr
                             fontSize: 22, 
                             fontWeight: FontWeight.bold, 
                             fontFamily: 'monospace', 
-                            shadows: [ // 🧠 FIXED: Changed from boxShadow to shadows for TextStyle compatibility
+                            shadows: [
                               Shadow(color: const Color(0xFF00F0FF).withOpacity(0.5), blurRadius: 8)
                             ],
                           ),
@@ -200,7 +200,7 @@ class _BootSequenceWrapperState extends State<BootSequenceWrapper> with TickerPr
 }
 
 // =========================================================================
-// MAIN INTERACTIVE CYBER COMMAND SHELL (FIXED STATUS BAR CLIPPING)
+// MAIN INTERACTIVE CYBER COMMAND SHELL (FIXED CLIPPING & BRACKETS)
 // =========================================================================
 class AdminCenterShell extends StatefulWidget {
   const AdminCenterShell({super.key});
@@ -266,7 +266,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
 
     return Scaffold(
       backgroundColor: const Color(0xFF090D16),
-      // 🛡️ SAFE AREA INTERCEPTOR: Perfectly isolates layouts past mobile status bar frames
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -366,7 +365,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                         ),
                       ),
 
-                      // Main Core Workspace Viewport Switcher
+                      // 🧠 FIXED BRACKETS HERE: Cleaned up trailing parameters inside the AnimatedSwitcher tree hierarchy
                       Expanded(
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 350),
@@ -375,10 +374,11 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                           child: KeyedSubtree(
                             key: ValueKey<String>(provider.activeConsole),
                             child: _buildConsoleWorkspace(provider.activeConsole, metrics, provider, isTablet, isDesktop, consoleAccent),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
