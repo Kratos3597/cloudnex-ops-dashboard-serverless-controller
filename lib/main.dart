@@ -17,41 +17,26 @@ void main() {
 
 class M365AdminCenterApp extends StatelessWidget {
   const M365AdminCenterApp({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'CloudNex Enterprise Cyber Management Ecosystem',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF090D16),
-        fontFamily: 'Courier New',
-      ),
-      home: const AdminCenterShell(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: const Color(0xFF090D16)),
+    home: const AdminCenterShell(),
+  );
 }
 
-// 🛡️ STABLE ARCHITECTURE: Prevents assertion errors by enforcing decoration-only styling
+// 🛡️ STRICT-MODE ARCHITECTURE: Enforces decoration-only styling
 class TerminalBox extends StatelessWidget {
   final Widget child;
   final BoxDecoration? decoration;
   final EdgeInsetsGeometry? padding;
-
-  const TerminalBox({
-    super.key,
-    required this.child,
-    this.decoration,
-    this.padding,
-  });
-
+  const TerminalBox({super.key, required this.child, this.decoration, this.padding});
   @override
   Widget build(BuildContext context) => Container(
     padding: padding ?? const EdgeInsets.all(16),
     decoration: decoration ?? BoxDecoration(
       color: const Color(0xFF111827).withOpacity(0.95),
-      border: Border.all(color: const Color(0xFF1F2937), width: 1.0),
+      border: Border.all(color: const Color(0xFF1F2937)),
     ),
     child: child,
   );
@@ -65,7 +50,7 @@ class AdminCenterShell extends StatefulWidget {
 
 class _AdminCenterShellState extends State<AdminCenterShell> {
   String _consoleOutput = "PS C:\\> SYSTEM_READY // AWAITING OPERATOR INPUT";
-  
+
   void _playTerminalChime() {
     SystemSound.play(SystemSoundType.click);
     HapticFeedback.heavyImpact();
@@ -75,7 +60,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> {
     _playTerminalChime();
     setState(() => _consoleOutput = "PS C:\\> [RUNNING] $task.ps1 // PROCESSING_THREAD...");
     Future.delayed(const Duration(seconds: 2), () {
-      setState(() => _consoleOutput = "PS C:\\> [SUCCESS] $task finalized // LOG_ID: ${math.Random().nextInt(9999)}");
+      if (mounted) setState(() => _consoleOutput = "PS C:\\> [SUCCESS] $task finalized // LOG_ID: ${math.Random().nextInt(9999)}");
     });
   }
 
@@ -97,7 +82,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> {
                 Expanded(
                   child: Row(
                     children: [
-                      _buildSidebar(provider),
+                      _buildSidebar(), // FIXED: No arguments passed
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(24),
@@ -106,9 +91,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> {
                             const SizedBox(height: 24),
                             _buildOperationsGrid(),
                             const SizedBox(height: 24),
-                            TerminalBox(
-                              child: Text(_consoleOutput, style: const TextStyle(color: Color(0xFF39FF14), fontFamily: 'monospace')),
-                            ),
+                            TerminalBox(child: Text(_consoleOutput, style: const TextStyle(color: Color(0xFF39FF14), fontFamily: 'monospace'))),
                           ],
                         ),
                       ),
@@ -180,7 +163,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> {
   );
 }
 
-// Matrix Engine
 class MatrixRainCanvas extends StatelessWidget {
   const MatrixRainCanvas({super.key});
   @override
