@@ -200,6 +200,38 @@ class _BootSequenceWrapperState extends State<BootSequenceWrapper> with TickerPr
 }
 
 // =========================================================================
+// REUSABLE TERMINAL BOX COMPONENT
+// =========================================================================
+class TerminalBox extends StatelessWidget {
+  final Widget child;
+  final BoxDecoration? decoration;
+  final EdgeInsetsGeometry? padding;
+  final Color? bgColor;
+
+  const TerminalBox({
+    super.key,
+    required this.child,
+    this.decoration,
+    this.padding,
+    this.bgColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final BoxDecoration finalDecoration = decoration ?? BoxDecoration(
+      color: bgColor ?? const Color(0xFF111827).withOpacity(0.95),
+      border: Border.all(color: const Color(0xFF1F2937), width: 1.0),
+    );
+
+    return Container(
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: finalDecoration,
+      child: child,
+    );
+  }
+}
+
+// =========================================================================
 // MAIN INTERACTIVE CYBER COMMAND SHELL (FIXED CLIPPING & BRACKETS)
 // =========================================================================
 class AdminCenterShell extends StatefulWidget {
@@ -277,7 +309,12 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                 color: consoleAccent,
                 interval: 24,
                 subdivisions: 1,
-                child: Container(),
+                // Removed the empty Container() which can sometimes trigger 
+                // assertion errors if the framework tries to paint it 
+                // with default properties conflicting with GridPaper.
+                child: const SizedBox.expand(), 
+              ),
+            ),
               ),
             ),
             Positioned.fill(child: CustomPaint(painter: CyberScanlinePainter())),
@@ -287,10 +324,10 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                 // Top Master Controller Nav Bar
                 Container(
                   height: 52,
-                  color: topBarColor,
                   padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 12),
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Color(0xFF1F2937), width: 1)),
+                  decoration: BoxDecoration(
+                    color: topBarColor,
+                    border: const Border(bottom: BorderSide(color: Color(0xFF1F2937), width: 1)),
                   ),
                   child: Row(
                     children: [
