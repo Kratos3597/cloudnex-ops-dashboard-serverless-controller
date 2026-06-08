@@ -20,9 +20,9 @@ class GitOpsControllerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'CloudNex CyberOps',
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF020604), // Deep terminal black
+        scaffoldBackgroundColor: const Color(0xFF020604),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00FF66), // Matrix Green Primary
+          seedColor: const Color(0xFF00FF66),
           brightness: Brightness.dark,
         ),
       ),
@@ -71,7 +71,6 @@ class DashboardShell extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Cyberpunk Grid System Overlay Background
           Positioned.fill(
             child: Opacity(
               opacity: 0.03,
@@ -84,7 +83,6 @@ class DashboardShell extends StatelessWidget {
               ),
             ),
           ),
-          // Main Body Context
           Consumer<DashboardProvider>(
             builder: (context, provider, child) {
               if (provider.isLoading && provider.metrics == null) {
@@ -137,7 +135,6 @@ class DashboardShell extends StatelessWidget {
                   const Text('[SYS_STATUS_METRICS]', style: TextStyle(color: Color(0xFF00FF66), fontFamily: 'Courier New', fontWeight: FontWeight.bold, fontSize: 13, shadows: [Shadow(color: Color(0xFF00FF66), blurRadius: 4)])),
                   const SizedBox(height: 12),
                   
-                  // Matrix Terminal Grid Block Elements
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
@@ -154,17 +151,17 @@ class DashboardShell extends StatelessWidget {
                       _buildCyberCard(
                         title: 'TOTAL REQUESTS',
                         value: provider.metrics?.totalRequests.toString() ?? 'E-404',
-                        color: const Color(0xFF00E5FF), // Cyber Blue
+                        color: const Color(0xFF00E5FF),
                       ),
                       _buildCyberCard(
                         title: 'EDGE CACHE HIT',
                         value: '${((provider.metrics?.cacheHitRate ?? 0) * 100).toStringAsFixed(0)}%',
-                        color: const Color(0xFFFF007F), // Neon Pink
+                        color: const Color(0xFFFF007F),
                       ),
                       _buildCyberCard(
                         title: 'AVG CPU TIME',
                         value: '${provider.metrics?.cpuTimeMs.toStringAsFixed(1) ?? '0'} MS',
-                        color: const Color(0xFFCCFF00), // Lime Glow
+                        color: const Color(0xFFCCFF00),
                       ),
                     ],
                   ),
@@ -173,7 +170,6 @@ class DashboardShell extends StatelessWidget {
                   const Text('[SERVERLESS_RAG_LOGSTREAM]', style: TextStyle(color: Color(0xFF00FF66), fontFamily: 'Courier New', fontWeight: FontWeight.bold, fontSize: 13, shadows: [Shadow(color: Color(0xFF00FF66), blurRadius: 4)])),
                   const SizedBox(height: 12),
 
-                  // Asynchronous Chat Logs Console Rows
                   provider.logs.isEmpty
                       ? Container(
                           padding: const EdgeInsets.all(20),
@@ -194,7 +190,7 @@ class DashboardShell extends StatelessWidget {
                               ),
                               child: ExpansionTile(
                                 iconColor: const Color(0xFF00FF66),
-                                collapseIconColor: const Color(0xFF00FF66),
+                                collapsedIconColor: const Color(0xFF00FF66), // Fixed syntax typo here
                                 title: Text('>> ${log.userQuery}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF00FF66), fontFamily: 'Courier New', fontSize: 14)),
                                 subtitle: Text('LATENCY: ${log.executionTime}S // TIME: ${log.timestamp.toLocal().toString().substring(11, 16)}', style: const TextStyle(color: Color(0xFF00AA44), fontFamily: 'Courier New', fontSize: 11)),
                                 children: [
@@ -208,9 +204,9 @@ class DashboardShell extends StatelessWidget {
                           },
                         ),
                 ],
-              ),
-            );
-          },
+              );
+            },
+          ),
         ],
       ),
     );
@@ -296,7 +292,6 @@ class DashboardShell extends StatelessWidget {
   }
 }
 
-// Special inner component to look like raw log streams
 class CrossPlatformCodeBlock extends StatelessWidget {
   final String response;
   const CrossPlatformCodeBlock({required this.response, super.key});
