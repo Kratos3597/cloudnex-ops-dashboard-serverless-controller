@@ -221,15 +221,14 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                 padding: EdgeInsets.symmetric(horizontal: isTablet ? 16 : 8),
                 child: Row(
                   children: [
-                    // 📍 CLOUDNEX LIVE BRAND IMAGE LOGO REPLACEMENT
+                    // CLOUDNEX LIVE BRAND IMAGE LOGO REPLACEMENT
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: Image.network(
-                        'https://cloudnex.co.za/assets/img/logo.png', // Pulls straight from your live portfolio web host asset pool
+                        'https://cloudnex.co.za/assets/img/logo.png',
                         height: 24,
                         width: 24,
                         fit: BoxFit.contain,
-                        // High-Fidelity Network Fallback Logic if Offline or Server Tunnels change
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             width: 24,
@@ -473,6 +472,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
         ],
       )),
       _buildHighDensityCard('Identity Cloud Topology', 'Entra ID Domain Federation Engine', Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(child: _buildMetricBlock(metrics["entraId"]["users"].toString(), 'AD Objects')),
           Container(width: 1, height: 24, color: const Color(0xFFEDEBE9)),
@@ -480,7 +480,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
         ],
       )),
       _buildHighDensityCard('Global Tenant Defense Summary', 'Microsoft Secure Score Metrics', Column(
-        mainAxisAlignment: Main => System Profiles
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -508,12 +508,12 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           const Text('Graph API Tokens Valid', style: TextStyle(fontSize: 10, color: Color(0xFF605E5C)), overflow: TextOverflow.ellipsis),
         ],
       ), borderHighlight: const Color(0xFF0078D4)),
-      _buildHighDensityCard('Directory Replication Pipelines', 'Microsoft Entra Connect Engine', const Column(
-        mainAxisAlignment: Main => Systems Setup
+      _buildHighDensityCard('Directory Replication Pipelines', 'Microsoft Entra Connect Engine', Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud_sync_rounded, size: 28, color: Color(0xFF0078D4)),
-          SizedBox(height: 4),
-          Text('In Sync Topology', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+          const Icon(Icons.cloud_sync_rounded, size: 28, color: Color(0xFF0078D4)),
+          const SizedBox(height: 4),
+          Text('In Sync Topology', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
         ],
       ), borderHighlight: const Color(0xFF0078D4)),
     ];
