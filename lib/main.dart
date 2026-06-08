@@ -46,6 +46,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
   @override
   void initState() {
     super.initState();
+    // Ambient geometric canvas pulse loop initialization
     _backgroundController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -71,6 +72,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
 
     bool isDesktop = MediaQuery.of(context).size.width > 850;
 
+    // Fluent Design System Adaptive Brand Identity Mapping
     Color consoleAccent;
     Color topBarColor;
     String consoleTitle;
@@ -78,33 +80,34 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     switch (provider.activeConsole) {
       case 'Entra':
         consoleAccent = const Color(0xFF0078D4);
-        topBarColor = const Color(0xFF11171F);
+        topBarColor = const Color(0xFF11171F); // Dark Identity Slate
         consoleTitle = 'Microsoft Entra admin center';
         break;
       case 'Intune':
         consoleAccent = const Color(0xFF0078D4);
-        topBarColor = const Color(0xFF242424);
+        topBarColor = const Color(0xFF242424); // Device Management Graphite
         consoleTitle = 'Microsoft Intune admin center';
         break;
       case 'Veeam':
-        consoleAccent = const Color(0xFF00B159);
+        consoleAccent = const Color(0xFF00B159); // Veeam Emerald Green
         topBarColor = const Color(0xFF1A1A1A);
         consoleTitle = 'Veeam Availability Console';
         break;
       case 'Azure':
         consoleAccent = const Color(0xFF008AD7);
-        topBarColor = const Color(0xFF004578);
+        topBarColor = const Color(0xFF004578); // Azure Classic Deep Blue
         consoleTitle = 'Microsoft Azure Portal';
         break;
       default:
         consoleAccent = const Color(0xFF0078D4);
-        topBarColor = const Color(0xFF004578);
+        topBarColor = const Color(0xFF004578); // M365 Corporate Blue
         consoleTitle = 'Microsoft 365 admin center';
     }
 
     return Scaffold(
       body: Stack(
         children: [
+          // --- AMBIENT GEOMETRIC CANVAS PULSE LAYER ---
           AnimatedBuilder(
             animation: _backgroundController,
             builder: (context, child) {
@@ -123,6 +126,8 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
               );
             },
           ),
+          
+          // Subtle Dot-Matrix Technical Mesh Overlay
           Opacity(
             opacity: 0.02,
             child: GridPaper(
@@ -132,8 +137,11 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
               child: Container(),
             ),
           ),
+
+          // --- MAIN SYSTEM PANEL INTERFACE ---
           Column(
             children: [
+              // Global Shell App Bar
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 48,
@@ -161,9 +169,12 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                   ],
                 ),
               ),
+
+              // Enterprise Work Space Split Panel
               Expanded(
                 child: Row(
                   children: [
+                    // Left Structural Navigation Rail
                     Container(
                       width: 56,
                       color: Colors.white,
@@ -173,14 +184,16 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                       child: Column(
                         children: [
                           const SizedBox(height: 12),
-                          _buildConsoleRailButton(context, 'M365', Icons.dashboard_customize_outlined, 'M365 Admin', consoleAccent),
-                          _buildConsoleRailButton(context, 'Entra', Icons.badge_outlined, 'Entra ID Portal', consoleAccent),
-                          _buildConsoleRailButton(context, 'Intune', Icons.phonelink_setup_outlined, 'Intune Endpoint', consoleAccent),
-                          _buildConsoleRailButton(context, 'Veeam', Icons.shield_outlined, 'Veeam Console', consoleAccent),
-                          _buildConsoleRailButton(context, 'Azure', Icons.cloud_done_outlined, 'Azure Portal', consoleAccent),
+                          _buildConsoleRailButton(context, 'M365', Icons.dashboard_customize_outlined, 'M365 Admin Center', consoleAccent),
+                          _buildConsoleRailButton(context, 'Entra', Icons.badge_outlined, 'Entra ID Management', consoleAccent),
+                          _buildConsoleRailButton(context, 'Intune', Icons.phonelink_setup_outlined, 'Intune Device Node', consoleAccent),
+                          _buildConsoleRailButton(context, 'Veeam', Icons.shield_outlined, 'Veeam Backup Core', consoleAccent),
+                          _buildConsoleRailButton(context, 'Azure', Icons.cloud_done_outlined, 'Azure Infrastructure', consoleAccent),
                         ],
                       ),
                     ),
+
+                    // Main View Canvas with Fluid Switcher Transitions
                     Expanded(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 400),
@@ -214,10 +227,12 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // --- COMPONENT FACTORY: RE-ROUTING WORKSPACE VIEWPORTS ---
   Widget _buildConsoleWorkspace(String console, Map<String, dynamic> metrics, DashboardProvider provider, bool isDesktop) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       children: [
+        // Live Operations Corporate Status Bar
         Row(
           children: [
             Column(
@@ -228,7 +243,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF323130), letterSpacing: -0.5),
                 ),
                 Text(
-                  'Directory Scope: ${metrics["tenantId"]}',
+                  'Directory Scope Scope ID: ${metrics["tenantId"]}',
                   style: const TextStyle(fontSize: 11, color: Color(0xFF797775)),
                 ),
               ],
@@ -238,6 +253,8 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           ],
         ),
         const SizedBox(height: 24),
+
+        // Display Rendering Target Injection
         if (console == 'M365') ...[
           _buildM365Workspace(metrics, isDesktop),
         ] else if (console == 'Entra') ...[
@@ -249,12 +266,15 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
         ] else if (console == 'Azure') ...[
           _buildAzureWorkspace(metrics, isDesktop),
         ],
+
         const SizedBox(height: 32),
         const Text(
           'Tenant Infrastructure Live Audit Stream',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF323130)),
         ),
         const SizedBox(height: 12),
+
+        // Global Audit Event Pipeline Display Card
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -282,6 +302,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // =========================================================
+  // VIEWPORT MODULE 1: MICROSOFT 365 ADMIN WORKSPACE
+  // =========================================================
   Widget _buildM365Workspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -324,6 +347,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // =========================================================
+  // VIEWPORT MODULE 2: MICROSOFT ENTRA ID DASHBOARD
+  // =========================================================
   Widget _buildEntraWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -341,7 +367,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           ],
         ), borderHighlight: const Color(0xFF0078D4)),
         _buildHighDensityCard('Application Security Registry', 'Enterprise OAuth App Registrations & Client Tokens', Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: Main => System Profiles
           children: [
             Text(metrics["entraId"]["appRegistrations"].toString(), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
             const Text('All Graph API Client Tokens Valid', style: TextStyle(fontSize: 11, color: Color(0xFF605E5C))),
@@ -359,6 +385,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // =========================================================
+  // VIEWPORT MODULE 3: MICROSOFT INTUNE ENDPOINT CONSOLE
+  // =========================================================
   Widget _buildIntuneWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -391,7 +420,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
             )
           ],
         )),
-        _buildHighDensityCard('Managed Endpoint Architecture Spread', 'Platform OS Distribution Registry', Row(
+        _buildHighDensityCard('Managed Endpoint OS Spread', 'Platform OS Distribution Registry', Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildMetricBlock(metrics["intune"]["windows"].toString(), 'Windows 11'),
@@ -403,6 +432,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // =========================================================
+  // VIEWPORT MODULE 4: VEEAM AVAILABILITY ENVIRONMENT
+  // =========================================================
   Widget _buildVeeamWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -432,6 +464,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // =========================================================
+  // VIEWPORT MODULE 5: MICROSOFT AZURE PORTAL VIEW
+  // =========================================================
   Widget _buildAzureWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -459,6 +494,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // --- COMPONENT FACTORY: HOVER-ACTIVE ENTERPRISE GRID CARD TILES ---
   Widget _buildHighDensityCard(String title, String subtitle, Widget child, {Color? borderHighlight}) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -470,8 +506,8 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(2),
+              color: Colors.white, // Color is defined here safely inside decoration to prevent assertion conflicts
+              borderRadius: BorderRadius.circular(2), // Flat, crisp edge vectors
               border: Border.all(color: isHovered ? (borderHighlight ?? const Color(0xFF0078D4)) : const Color(0xFFE0E0E0), width: isHovered ? 1.5 : 1),
               boxShadow: [
                 BoxShadow(
@@ -496,13 +532,14 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // --- RECTILINEAR RAIL ACCESS ROUTE ACCENTS ---
   Widget _buildConsoleRailButton(BuildContext context, String consoleId, IconData icon, String label, Color highlightColor) {
     final provider = Provider.of<DashboardProvider>(context);
     bool isActive = provider.activeConsole == consoleId;
 
     return Tooltip(
       message: label,
-      preferBelow: false,
+      preferBelow: false, // Solves parameter structural compilation anomalies
       child: InkWell(
         onTap: () => provider.changeConsole(consoleId),
         child: AnimatedContainer(
@@ -519,6 +556,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
+  // --- REPEATING STATUS ENGINE PULSE ANIMATION ---
   Widget _buildPulseStatusIndicator() {
     return StatefulBuilder(
       builder: (context, setState) {
