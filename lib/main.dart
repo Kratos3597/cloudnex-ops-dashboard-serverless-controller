@@ -11,6 +11,86 @@ void main() {
   );
 }
 
+// =========================================================================
+// 🛡️ THE NEW FIX: COMPILER-SAFE CONTAINERS TO ELIMINATE ASSERTION CRASHES
+// =========================================================================
+class SafeContainer extends StatelessWidget {
+  final EdgeInsetsGeometry? padding;
+  final Widget? child;
+  final double? width;
+  final double? height;
+  final Color? color;
+  final BoxDecoration? decoration;
+
+  const SafeContainer({
+    super.key,
+    this.padding,
+    this.child,
+    this.width,
+    this.height,
+    this.color,
+    this.decoration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // If a decoration exists, we safely absorb the top-level color into it
+    BoxDecoration? finalDecoration = decoration;
+    if (color != null) {
+      finalDecoration = (decoration ?? const BoxDecoration()).copyWith(color: color);
+    }
+
+    return Container(
+      width: width,
+      height: height,
+      padding: padding,
+      decoration: finalDecoration,
+      child: child,
+    );
+  }
+}
+
+class SafeAnimatedContainer extends StatelessWidget {
+  final EdgeInsetsGeometry? padding;
+  final Widget? child;
+  final double? width;
+  final double? height;
+  final Color? color;
+  final BoxDecoration? decoration;
+  final Duration duration;
+
+  const SafeAnimatedContainer({
+    super.key,
+    this.padding,
+    this.child,
+    this.width,
+    this.height,
+    this.color,
+    this.decoration,
+    required this.duration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    BoxDecoration? finalDecoration = decoration;
+    if (color != null) {
+      finalDecoration = (decoration ?? const BoxDecoration()).copyWith(color: color);
+    }
+
+    return AnimatedContainer(
+      duration: duration,
+      width: width,
+      height: height,
+      padding: padding,
+      decoration: finalDecoration,
+      child: child,
+    );
+  }
+}
+
+// =========================================================================
+// MAIN APPLICATION LAYOUT
+// =========================================================================
 class M365AdminCenterApp extends StatelessWidget {
   const M365AdminCenterApp({super.key});
 
@@ -46,7 +126,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    // Ambient geometric canvas pulse loop initialization
     _backgroundController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -72,7 +151,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
 
     bool isDesktop = MediaQuery.of(context).size.width > 850;
 
-    // Fluent Design System Adaptive Brand Identity Mapping
     Color consoleAccent;
     Color topBarColor;
     String consoleTitle;
@@ -80,34 +158,33 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     switch (provider.activeConsole) {
       case 'Entra':
         consoleAccent = const Color(0xFF0078D4);
-        topBarColor = const Color(0xFF11171F); // Dark Identity Slate
+        topBarColor = const Color(0xFF11171F);
         consoleTitle = 'Microsoft Entra admin center';
         break;
       case 'Intune':
         consoleAccent = const Color(0xFF0078D4);
-        topBarColor = const Color(0xFF242424); // Device Management Graphite
+        topBarColor = const Color(0xFF242424);
         consoleTitle = 'Microsoft Intune admin center';
         break;
       case 'Veeam':
-        consoleAccent = const Color(0xFF00B159); // Veeam Emerald Green
+        consoleAccent = const Color(0xFF00B159);
         topBarColor = const Color(0xFF1A1A1A);
         consoleTitle = 'Veeam Availability Console';
         break;
       case 'Azure':
         consoleAccent = const Color(0xFF008AD7);
-        topBarColor = const Color(0xFF004578); // Azure Classic Deep Blue
+        topBarColor = const Color(0xFF004578);
         consoleTitle = 'Microsoft Azure Portal';
         break;
       default:
         consoleAccent = const Color(0xFF0078D4);
-        topBarColor = const Color(0xFF004578); // M365 Corporate Blue
+        topBarColor = const Color(0xFF004578);
         consoleTitle = 'Microsoft 365 admin center';
     }
 
     return Scaffold(
       body: Stack(
         children: [
-          // --- AMBIENT GEOMETRIC CANVAS PULSE LAYER ---
           AnimatedBuilder(
             animation: _backgroundController,
             builder: (context, child) {
@@ -126,8 +203,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
               );
             },
           ),
-          
-          // Subtle Dot-Matrix Technical Mesh Overlay
           Opacity(
             opacity: 0.02,
             child: GridPaper(
@@ -137,12 +212,9 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
               child: Container(),
             ),
           ),
-
-          // --- MAIN SYSTEM PANEL INTERFACE ---
           Column(
             children: [
-              // Global Shell App Bar
-              AnimatedContainer(
+              SafeAnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 48,
                 color: topBarColor,
@@ -169,13 +241,10 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                   ],
                 ),
               ),
-
-              // Enterprise Work Space Split Panel
               Expanded(
                 child: Row(
                   children: [
-                    // Left Structural Navigation Rail
-                    Container(
+                    SafeContainer(
                       width: 56,
                       color: Colors.white,
                       decoration: const BoxDecoration(
@@ -192,8 +261,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                         ],
                       ),
                     ),
-
-                    // Main View Canvas with Fluid Switcher Transitions
                     Expanded(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 400),
@@ -227,12 +294,10 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // --- COMPONENT FACTORY: RE-ROUTING WORKSPACE VIEWPORTS ---
   Widget _buildConsoleWorkspace(String console, Map<String, dynamic> metrics, DashboardProvider provider, bool isDesktop) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       children: [
-        // Live Operations Corporate Status Bar
         Row(
           children: [
             Column(
@@ -253,8 +318,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
           ],
         ),
         const SizedBox(height: 24),
-
-        // Display Rendering Target Injection
         if (console == 'M365') ...[
           _buildM365Workspace(metrics, isDesktop),
         ] else if (console == 'Entra') ...[
@@ -266,16 +329,13 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
         ] else if (console == 'Azure') ...[
           _buildAzureWorkspace(metrics, isDesktop),
         ],
-
         const SizedBox(height: 32),
         const Text(
           'Tenant Infrastructure Live Audit Stream',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF323130)),
         ),
         const SizedBox(height: 12),
-
-        // Global Audit Event Pipeline Display Card
-        Container(
+        SafeContainer(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(2),
@@ -302,9 +362,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // =========================================================
-  // VIEWPORT MODULE 1: MICROSOFT 365 ADMIN WORKSPACE
-  // =========================================================
   Widget _buildM365Workspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -347,9 +404,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // =========================================================
-  // VIEWPORT MODULE 2: MICROSOFT ENTRA ID DASHBOARD
-  // =========================================================
   Widget _buildEntraWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -366,7 +420,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
             const Text('Zero Flagged Identity Threats Active', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF107C41))),
           ],
         ), borderHighlight: const Color(0xFF0078D4)),
-        _buildHighDensityCard('Application Security Registry', 'Enterprise OAuth App Registrations & Client Tokens', Column(
+        _buildHighDensityCard('Application Security Registry', 'Enterprise OAuth App Registrations Tokens', Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(metrics["entraId"]["appRegistrations"].toString(), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Color(0xFF0078D4))),
@@ -385,9 +439,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // =========================================================
-  // VIEWPORT MODULE 3: MICROSOFT INTUNE ENDPOINT CONSOLE
-  // =========================================================
   Widget _buildIntuneWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -432,9 +483,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // =========================================================
-  // VIEWPORT MODULE 4: VEEAM AVAILABILITY ENVIRONMENT
-  // =========================================================
   Widget _buildVeeamWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -464,9 +512,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // =========================================================
-  // VIEWPORT MODULE 5: MICROSOFT AZURE PORTAL VIEW
-  // =========================================================
   Widget _buildAzureWorkspace(Map<String, dynamic> metrics, bool isDesktop) {
     return GridView.count(
       crossAxisCount: isDesktop ? 3 : 1,
@@ -494,7 +539,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // --- COMPONENT FACTORY: HOVER-ACTIVE ENTERPRISE GRID CARD TILES ---
   Widget _buildHighDensityCard(String title, String subtitle, Widget child, {Color? borderHighlight}) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -502,13 +546,16 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
         return MouseRegion(
           onEnter: (_) => setState(() => isHovered = true),
           onExit: (_) => setState(() => isHovered = false),
-          child: AnimatedContainer(
+          child: SafeAnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white, // Color is defined here safely inside decoration to prevent assertion conflicts
-              borderRadius: BorderRadius.circular(2), // Flat, crisp edge vectors
-              border: Border.all(color: isHovered ? (borderHighlight ?? const Color(0xFF0078D4)) : const Color(0xFFE0E0E0), width: isHovered ? 1.5 : 1),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(2),
+              border: Border.all(
+                color: isHovered ? (borderHighlight ?? const Color(0xFF0078D4)) : const Color(0xFFE0E0E0), 
+                width: isHovered ? 1.5 : 1,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(isHovered ? 0.05 : 0.01),
@@ -532,17 +579,16 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // --- RECTILINEAR RAIL ACCESS ROUTE ACCENTS ---
   Widget _buildConsoleRailButton(BuildContext context, String consoleId, IconData icon, String label, Color highlightColor) {
     final provider = Provider.of<DashboardProvider>(context);
     bool isActive = provider.activeConsole == consoleId;
 
     return Tooltip(
       message: label,
-      preferBelow: false, // Solves parameter structural compilation anomalies
+      preferBelow: false,
       child: InkWell(
         onTap: () => provider.changeConsole(consoleId),
-        child: AnimatedContainer(
+        child: SafeAnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: 56,
           height: 48,
@@ -556,7 +602,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
     );
   }
 
-  // --- REPEATING STATUS ENGINE PULSE ANIMATION ---
   Widget _buildPulseStatusIndicator() {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -568,7 +613,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
               opacity: 1.3 - value,
               child: Transform.scale(
                 scale: value,
-                child: Container(
+                child: SafeContainer(
                   width: 7,
                   height: 7,
                   decoration: const BoxDecoration(color: Color(0xFF107C41), shape: BoxShape.circle),
