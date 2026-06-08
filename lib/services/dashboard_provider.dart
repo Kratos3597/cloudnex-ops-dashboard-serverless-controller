@@ -1,59 +1,90 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart';
-import 'storage_service.dart';
-import '../models/chat_log_model.dart';
-import '../models/node_metrics_model.dart';
 
 class DashboardProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  final StorageService _storageService = StorageService();
-
-  NodeMetrics? _metrics;
-  List<ChatLog> _logs = [];
   bool _isLoading = false;
-  String? _errorMessage;
-  String _currentWorkerUrl = '';
+  String _currentWorkerUrl = 'https://portfolio-chat-bridge.sheikwin10.workers.dev';
+  String _activeConsole = 'M365'; // Default starting view state
 
-  NodeMetrics? get metrics => _metrics;
-  List<ChatLog> get logs => _logs;
+  // Public Getters explicitly tracking UI demands
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
   String get currentWorkerUrl => _currentWorkerUrl;
+  String get activeConsole => _activeConsole;
 
-  /// Load the saved URL configuration from the hardware vault on initialization
-  Future<void> loadConfig() async {
-    final url = await _storageService.getWorkerUrl();
-    _currentWorkerUrl = url ?? 'https://portfolio-chat-bridge.Kratos3597.workers.dev';
+  // Multi-Tenant Infrastructure Map State Variables
+  Map<String, dynamic> tenantMetrics = {};
+  List<Map<String, dynamic>> infrastructureLogs = [];
+
+  void changeConsole(String consoleId) {
+    _activeConsole = consoleId;
     notifyListeners();
   }
 
-  /// Save a new target endpoint securely and trigger an immediate cluster update
+  Future<void> loadConfig() async {
+    _generateHighFidelityDummyData();
+    notifyListeners();
+  }
+
+  void _generateHighFidelityDummyData() {
+    // High-fidelity Microsoft 365, Azure, Entra, and Veeam monitoring structures
+    tenantMetrics = {
+      "tenantName": "CloudNex Enterprise Solutions",
+      "tenantId": "c0a80101-7b3c-44af-8123-dc101337afaa",
+      "serverSpace": {"usedTB": 42.8, "totalTB": 64.0, "status": "Healthy"},
+      "backupServers": {"total": 12, "successful": 11, "failed": 1, "lastSync": "Just now"},
+      "securityScore": {"current": 84, "target": 95, "mfaEnabled": "98%"},
+      "entraId": {"users": 1245, "groups": 88, "syncStatus": "In Sync", "riskyUsers": 0, "appRegistrations": 14},
+      "intune": {"compliantDevices": 1102, "nonCompliant": 14, "totalDevices": 1116, "windows": 942, "iOS": 120, "android": 54},
+      "veeam": {"sobrCapacity": 84.5, "successRate": 99.2, "repoStatus": "Immutable"},
+      "azure": {"activeVMs": 8, "vnetStatus": "Connected", "monthlyBurn": "R 14,250"}
+    };
+
+    infrastructureLogs = [
+      {
+        "category": "Intune",
+        "event": "Device Configuration Profile Enforcement",
+        "details": "Pushed BitLocker Encryption policy to 14 newly enrolled Windows 11 Endpoints.",
+        "status": "Success",
+        "timestamp": "10:14 AM"
+      },
+      {
+        "category": "Backup",
+        "event": "Veeam Replication Job: VM-PROD-SQL01",
+        "details": "Synthetic full backup completed. 1.2 TB processed. Target storage repository: On-Premise SAN.",
+        "status": "Success",
+        "timestamp": "09:30 AM"
+      },
+      {
+        "category": "Security",
+        "event": "Entra ID Identity Protection Alert",
+        "details": "Unfamiliar sign-in properties detected for user admin@cloudnex.co.za. Risk mitigated via conditional access MFA challenge.",
+        "status": "Warning",
+        "timestamp": "08:45 AM"
+      },
+      {
+        "category": "Infrastructure",
+        "event": "Hyper-V Cluster Node Storage Allocation",
+        "details": "Provisioned 500GB VHDX for automated dev environment sandbox pipeline.",
+        "status": "Success",
+        "timestamp": "07:12 AM"
+      }
+    ];
+  }
+
   Future<void> updateWorkerUrl(String newUrl) async {
-    await _storageService.saveWorkerUrl(newUrl);
     _currentWorkerUrl = newUrl;
     notifyListeners();
     await refreshDashboard();
   }
 
-  /// Trigger a live refresh from your Cloudflare Worker endpoint
   Future<void> refreshDashboard() async {
     _isLoading = true;
-    _errorMessage = null;
     notifyListeners();
 
-    try {
-      final results = await Future.wait([
-        _apiService.fetchNodeMetrics(),
-        _apiService.fetchChatLogs(),
-      ]);
+    // Minor cloud network emulation delay
+    await Future.delayed(const Duration(milliseconds: 400));
+    _generateHighFidelityDummyData();
 
-      _metrics = results[0] as NodeMetrics;
-      _logs = results[1] as List<ChatLog>;
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    _isLoading = false;
+    notifyListeners();
   }
 }

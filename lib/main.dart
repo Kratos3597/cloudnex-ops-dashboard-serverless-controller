@@ -127,7 +127,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
             },
           ),
           
-          // Subtle Dot-Matrix Grid Infrastructure Overlay
+          // Subtle Dot-Matrix Grid Infrastructure Texture Overlay
           Opacity(
             opacity: 0.02,
             child: GridPaper(
@@ -165,12 +165,6 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
                           ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                           : const Icon(Icons.refresh, color: Colors.white, size: 18),
                       onPressed: () => provider.refreshDashboard(),
-                    ),
-                    const SizedBox(width: 12),
-                    const CircleAvatar(
-                      radius: 13,
-                      backgroundColor: Color(0xFF0078D4),
-                      child: Text('MS', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -545,7 +539,7 @@ class _AdminCenterShellState extends State<AdminCenterShell> with SingleTickerPr
 
     return Tooltip(
       message: label,
-      placement: TooltipPlacement.right,
+      preferBelow: false, // Solves 'placement' syntax error parameters
       child: InkWell(
         onTap: () => provider.changeConsole(consoleId),
         child: AnimatedContainer(
