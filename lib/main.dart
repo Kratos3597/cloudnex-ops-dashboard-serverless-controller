@@ -1,322 +1,138 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'services/dashboard_provider.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => DashboardProvider()..loadConfig(),
-      child: const App(),
-    ),
-  );
+  runApp(const CloudnexApp());
 }
 
-class App extends StatelessWidget {
-  const App({super.key});
+class CloudnexApp extends StatelessWidget {
+  const CloudnexApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'Cloudnex Control',
       debugShowCheckedModeBanner: false,
-      home: CyberDashboard(),
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF05050A),
+        primaryColor: Colors.cyanAccent,
+      ),
+      home: const HomeScreen(),
     );
   }
 }
 
-///////////////////////////////////////////////////////////
-/// MAIN DASHBOARD
-///////////////////////////////////////////////////////////
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-class CyberDashboard extends StatelessWidget {
-  const CyberDashboard({super.key});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int index = 0;
+
+  final List<Widget> screens = const [
+    DashboardScreen(),
+    ModuleScreen(title: "Veeam Backup"),
+    ModuleScreen(title: "Azure"),
+    ModuleScreen(title: "Entra ID"),
+    ModuleScreen(title: "Intune"),
+    ModuleScreen(title: "Active Directory"),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF090D16),
-      body: Stack(
-        children: [
-          const Positioned.fill(child: CyberBackground()),
-
-          Column(
-            children: const [
-              TopNavBar(),
-              TelemetryRow(),
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(flex: 3, child: LeftSelector()),
-                    Expanded(flex: 7, child: TerminalPanel()),
-                  ],
-                ),
-              ),
-            ],
-          )
+      appBar: AppBar(
+        title: const Text("Cloudnex Control"),
+        backgroundColor: Colors.black,
+      ),
+      body: screens[index],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: index,
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.cyanAccent,
+        unselectedItemColor: Colors.white38,
+        onTap: (i) {
+          setState(() {
+            index = i;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.storage), label: "Veeam"),
+          BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Azure"),
+          BottomNavigationBarItem(icon: Icon(Icons.security), label: "Entra"),
+          BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Intune"),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: "AD"),
         ],
       ),
     );
   }
 }
 
-///////////////////////////////////////////////////////////
-/// TOP NAVBAR
-///////////////////////////////////////////////////////////
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
 
-class TopNavBar extends StatelessWidget {
-  const TopNavBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget buildCard(String title, String value, IconData icon) {
     return Container(
+      margin: const EdgeInsets.all(10),
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF1F2937))),
-      ),
-      child: Row(
-        children: const [
-          Text(
-            "_CLOUDNEX",
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 18,
-              color: Colors.white,
-            ),
-          ),
-          Spacer(),
-          Text(
-            "CAPABILITIES // ENGAGED",
-            style: TextStyle(
-              color: Color(0xFF39FF14),
-              fontFamily: 'monospace',
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-///////////////////////////////////////////////////////////
-/// TELEMETRY ROW
-///////////////////////////////////////////////////////////
-
-class TelemetryRow extends StatelessWidget {
-  const TelemetryRow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        Expanded(child: TelemetryCard(Icons.shield, "100%", "Compliance")),
-        Expanded(child: TelemetryCard(Icons.terminal, "4 ACTIVE", "Runbooks")),
-        Expanded(child: TelemetryCard(Icons.favorite, "SCAN", "Health Check")),
-      ],
-    );
-  }
-}
-
-class TelemetryCard extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-
-  const TelemetryCard(this.icon, this.value, this.label, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        border: Border.all(color: const Color(0xFF1F2937)),
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.cyanAccent),
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF00F0FF)),
-          const SizedBox(width: 10),
+          Icon(icon, color: Colors.cyanAccent, size: 40),
+          const SizedBox(width: 15),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(title, style: const TextStyle(color: Colors.white70)),
               Text(
                 value,
                 style: const TextStyle(
-                  color: Color(0xFF39FF14),
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: Colors.cyanAccent,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
-              Text(label, style: const TextStyle(color: Colors.grey)),
             ],
           )
         ],
       ),
     );
   }
-}
-
-///////////////////////////////////////////////////////////
-/// LEFT PANEL
-///////////////////////////////////////////////////////////
-
-class LeftSelector extends StatelessWidget {
-  const LeftSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: const [
-        CategoryCard("Cloud Engineering"),
-        CategoryCard("Identity Architecture"),
-        CategoryCard("Automation"),
+      children: [
+        buildCard("Backup Status", "OK", Icons.check_circle),
+        buildCard("Azure Status", "ONLINE", Icons.cloud),
+        buildCard("Devices", "28", Icons.devices),
+        buildCard("Users", "112", Icons.group),
       ],
     );
   }
 }
 
-class CategoryCard extends StatelessWidget {
+class ModuleScreen extends StatelessWidget {
   final String title;
 
-  const CategoryCard(this.title, {super.key});
+  const ModuleScreen({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        border: Border.all(color: const Color(0xFF1F2937)),
-      ),
+    return Center(
       child: Text(
-        title,
-        style: const TextStyle(color: Colors.white),
+        "$title Module",
+        style: const TextStyle(
+            color: Colors.cyanAccent,
+            fontSize: 22,
+            fontWeight: FontWeight.bold),
       ),
     );
   }
-}
-
-///////////////////////////////////////////////////////////
-/// TERMINAL PANEL
-///////////////////////////////////////////////////////////
-
-class TerminalPanel extends StatelessWidget {
-  const TerminalPanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF05070C),
-        border: Border.all(color: const Color(0xFF1F2937)),
-      ),
-      child: Column(
-        children: const [
-          TerminalHeader(),
-          Expanded(child: TerminalBody()),
-        ],
-      ),
-    );
-  }
-}
-
-class TerminalHeader extends StatelessWidget {
-  const TerminalHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      color: const Color(0xFF0E131F),
-      child: const Row(
-        children: [
-          CircleAvatar(radius: 4, backgroundColor: Colors.red),
-          SizedBox(width: 4),
-          CircleAvatar(radius: 4, backgroundColor: Colors.amber),
-          SizedBox(width: 4),
-          CircleAvatar(radius: 4, backgroundColor: Colors.green),
-          SizedBox(width: 10),
-          Text("capabilities.sh",
-              style: TextStyle(color: Colors.grey, fontSize: 12))
-        ],
-      ),
-    );
-  }
-}
-
-class TerminalBody extends StatelessWidget {
-  const TerminalBody({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(12),
-      child: Text(
-        "[NODE] Diagnostics Loading...\n> Awaiting input...\n> System ready.",
-        style: TextStyle(
-          color: Color(0xFF00F0FF),
-          fontFamily: 'monospace',
-        ),
-      ),
-    );
-  }
-}
-
-///////////////////////////////////////////////////////////
-/// BACKGROUND (HTML STYLE)
-///////////////////////////////////////////////////////////
-
-class CyberBackground extends StatelessWidget {
-  const CyberBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(color: const Color(0xFF090D16)),
-
-        // subtle grid
-        Positioned.fill(
-          child: Opacity(
-            opacity: 0.04,
-            child: GridPaper(
-              color: const Color(0xFF00F0FF),
-              interval: 24,
-            ),
-          ),
-        ),
-
-        // scanlines
-        const Positioned.fill(child: ScanLines()),
-      ],
-    );
-  }
-}
-
-class ScanLines extends StatelessWidget {
-  const ScanLines({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _ScanPainter());
-  }
-}
-
-class _ScanPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black.withOpacity(0.12);
-
-    for (double y = 0; y < size.height; y += 4) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_) => false;
 }
