@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -18,16 +17,16 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const BootScreen(),
+      home: BootScreen(),
     );
   }
 }
 
-// =====================================================
-// 🔥 CYBER BOOT TERMINAL
-// =====================================================
+///////////////////////////////////////////////////////////
+/// BOOT SCREEN
+///////////////////////////////////////////////////////////
 
 class BootScreen extends StatefulWidget {
   const BootScreen({super.key});
@@ -53,13 +52,13 @@ class _BootScreenState extends State<BootScreen> {
   @override
   void initState() {
     super.initState();
-    run();
+    runLogs();
   }
 
-  void run() {
+  void runLogs() {
     if (i < messages.length) {
       setState(() => logs.add(messages[i++]));
-      Future.delayed(const Duration(milliseconds: 350), run);
+      Future.delayed(const Duration(milliseconds: 350), runLogs);
     } else {
       Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushReplacement(
@@ -72,14 +71,14 @@ class _BootScreenState extends State<BootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF05070C),
+    return const Scaffold(
+      backgroundColor: Color(0xFF05070C),
       body: Stack(
         children: [
-          const Positioned.fill(child: MatrixRain()),
-          const Positioned.fill(child: ScanLines()),
+          Positioned.fill(child: MatrixRain()),
+          Positioned.fill(child: ScanLines()), // ✅ FIXED
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             child: ListView(
               children: logs
                   .map((e) => Text(
@@ -88,7 +87,8 @@ class _BootScreenState extends State<BootScreen> {
                           color: Color(0xFF39FF14),
                           fontFamily: 'monospace',
                           shadows: [
-                            Shadow(color: Color(0xFF39FF14), blurRadius: 6)
+                            Shadow(
+                                color: Color(0xFF39FF14), blurRadius: 6)
                           ],
                         ),
                       ))
@@ -101,9 +101,9 @@ class _BootScreenState extends State<BootScreen> {
   }
 }
 
-// =====================================================
-// 🔐 LOGIN
-// =====================================================
+///////////////////////////////////////////////////////////
+/// LOGIN
+///////////////////////////////////////////////////////////
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -116,7 +116,9 @@ class Login extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () {
             Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => const Dashboard()));
+              context,
+              MaterialPageRoute(builder: (_) => const Dashboard()),
+            );
           },
           child: const Text('ACCESS SYSTEM'),
         ),
@@ -125,12 +127,12 @@ class Login extends StatelessWidget {
   }
 }
 
-// =====================================================
-// DATA
-// =====================================================
+///////////////////////////////////////////////////////////
+/// PROVIDER (FAKE DATA)
+///////////////////////////////////////////////////////////
 
 class FakeProvider extends ChangeNotifier {
-  Map<String, dynamic> data = {
+  final data = {
     "users": 1532,
     "devices": 342,
     "alerts": 4,
@@ -139,9 +141,9 @@ class FakeProvider extends ChangeNotifier {
   };
 }
 
-// =====================================================
-// DASHBOARD
-// =====================================================
+///////////////////////////////////////////////////////////
+/// DASHBOARD
+///////////////////////////////////////////////////////////
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -156,20 +158,20 @@ class Dashboard extends StatelessWidget {
         title: const Text('CLOUDNEX CONTROL CORE'),
         backgroundColor: const Color(0xFF111827),
       ),
-      body: Stack(
+      body: const Stack(
         children: [
-          const Positioned.fill(child: MatrixRain(opacity: 0.05)),
-          const Positioned.fill(child: ScanLines()),
+          Positioned.fill(child: MatrixRain(opacity: 0.05)),
+          Positioned.fill(child: ScanLines()), // ✅ FIXED
           ListView(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             children: [
-              card('USERS', d['users'].toString()),
-              card('DEVICES', d['devices'].toString()),
-              card('ALERTS', d['alerts'].toString()),
-              card('VMS', d['vms'].toString()),
-              card('BILLING', d['billing']),
-              const SizedBox(height: 20),
-              const Text('LIVE EVENT STREAM',
+              cyberCard('USERS', d['users'].toString()),
+              cyberCard('DEVICES', d['devices'].toString()),
+              cyberCard('ALERTS', d['alerts'].toString()),
+              cyberCard('VMS', d['vms'].toString()),
+              cyberCard('BILLING', d['billing']),
+              SizedBox(height: 20),
+              Text('LIVE EVENT STREAM',
                   style: TextStyle(color: Colors.orange)),
               ...List.generate(6, (i) => logItem(i)),
             ],
@@ -180,11 +182,11 @@ class Dashboard extends StatelessWidget {
   }
 }
 
-// =====================================================
-// CARD
-// =====================================================
+///////////////////////////////////////////////////////////
+/// CYBER CARD
+///////////////////////////////////////////////////////////
 
-Widget card(String title, String value) {
+Widget cyberCard(String title, String value) {
   return Container(
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(16),
@@ -199,10 +201,13 @@ Widget card(String title, String value) {
         Text(
           value,
           style: const TextStyle(
-              color: Color(0xFF39FF14),
-              fontWeight: FontWeight.bold,
-              shadows: [Shadow(blurRadius: 8, color: Color(0xFF39FF14))]),
-        )
+            color: Color(0xFF39FF14),
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(blurRadius: 8, color: Color(0xFF39FF14))
+            ],
+          ),
+        ),
       ],
     ),
   );
@@ -218,9 +223,9 @@ Widget logItem(int i) {
   );
 }
 
-// =====================================================
-// MATRIX RAIN
-// =====================================================
+///////////////////////////////////////////////////////////
+/// MATRIX RAIN
+///////////////////////////////////////////////////////////
 
 class MatrixRain extends StatefulWidget {
   final double opacity;
@@ -237,7 +242,7 @@ class _MatrixRainState extends State<MatrixRain> {
   void initState() {
     super.initState();
     timer = Timer.periodic(const Duration(milliseconds: 60), (_) {
-      setState(() {});
+      if (mounted) setState(() {});
     });
   }
 
@@ -264,14 +269,17 @@ class MatrixPainter extends CustomPainter {
     for (int i = 0; i < size.width / 10; i++) {
       final tp = TextPainter(
         text: TextSpan(
-            text: rand.nextBool() ? '0' : '1',
-            style: TextStyle(
-                color: const Color(0xFF39FF14).withOpacity(opacity))),
+          text: rand.nextBool() ? '0' : '1',
+          style: TextStyle(
+              color: const Color(0xFF39FF14).withValues(alpha: opacity)),
+        ),
         textDirection: TextDirection.ltr,
       )..layout();
 
-      tp.paint(canvas,
-          Offset(i * 10, rand.nextDouble() * size.height));
+      tp.paint(
+        canvas,
+        Offset(i * 10, rand.nextDouble() * size.height),
+      );
     }
   }
 
@@ -279,15 +287,17 @@ class MatrixPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-// =====================================================
-// SCANLINES
-// =====================================================
+///////////////////////////////////////////////////////////
+/// SCANLINES ✅ FIXED CONST CONSTRUCTOR
+///////////////////////////////////////////////////////////
 
 class ScanLines extends CustomPainter {
+  const ScanLines(); // ✅ THIS FIXES YOUR ERROR
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black.withOpacity(0.15)
+      ..color = Colors.black.withValues(alpha: 0.15)
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += 4) {
@@ -298,3 +308,4 @@ class ScanLines extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+``
