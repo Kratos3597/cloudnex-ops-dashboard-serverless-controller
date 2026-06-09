@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';importimport 'home_screen.dart';
-
-class BootScreen extends StatefulWidget {
-  const BootScreen({super.key});
+import 'package:flutter/material.dart';
+import 'home({super.key});import 'home_screen.dart';
 
   @override
   State<BootScreen> createState() => _BootScreenState();
 }
 
 class _BootScreenState extends State<BootScreen> {
-  final List<String> _steps = [
+  final List<String> steps = [
     "INITIALIZING CLOUDNEX CONTROL...",
     "CONNECTING TO AZURE...",
     "SYNCING DIRECTORY...",
@@ -16,33 +14,34 @@ class _BootScreenState extends State<BootScreen> {
     "ACCESS GRANTED"
   ];
 
-  List<String> _visibleLogs = [];
+  List<String> logs = [];
 
   @override
   void initState() {
     super.initState();
-    _startBootSequence();
+    runBootSequence();
   }
 
-  Future<void> _startBootSequence() async {
-    for (String step in _steps) {
+  Future<void> runBootSequence() async {
+    for (var step in steps) {
       await Future.delayed(const Duration(milliseconds: 900));
 
       if (!mounted) return;
 
       setState(() {
-        _visibleLogs.add(step);
+        logs.add(step);
       });
     }
 
-    // Final delay before moving to main app
     await Future.delayed(const Duration(milliseconds: 800));
 
     if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ),
     );
   }
 
@@ -56,7 +55,7 @@ class _BootScreenState extends State<BootScreen> {
           alignment: Alignment.topLeft,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: _visibleLogs.map((line) {
+            children: logs.map((line) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
@@ -76,3 +75,6 @@ class _BootScreenState extends State<BootScreen> {
     );
   }
 }
+
+
+class BootScreen extends StatefulWidget {
