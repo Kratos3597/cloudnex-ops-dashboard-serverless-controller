@@ -1,6 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'screens/boot_screen.dart';
-import 'theme/cyberpunk_theme.dart'; //
+import 'theme/cyberpunk_theme.dart';
 
 void main() {
   runApp(const CloudnexApp());
@@ -16,6 +17,6 @@ class CloudnexApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: CyberpunkTheme.theme,
       home: const BootScreen(),
-      );
+    );
   }
 }

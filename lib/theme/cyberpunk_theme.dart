@@ -1,37 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CyberpunkTheme        selectedItemColor: Colors.cyanAccent,class CyberpunkTheme {
-        unselectedItemColor: Colors.white38,
-      ),
-
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: Colors.white70),
-      ),
-
-      cardTheme: CardTheme(
-        color: Colors.black,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-      ),
-    );
-  }
-
-  /// Neon Glow Decoration (reusable)
-  static BoxDecoration neonBox(Color color) {
-    return BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: color.withOpacity(0.7)),
-      boxShadow: [
-        BoxShadow(
-          color: color.withOpacity(0.6),
-          blurRadius: 15,
-        )
-      ],
-    );
-  }
-}
+class CyberpunkTheme {
   static ThemeData get theme {
     return ThemeData(
       brightness: Brightness.dark,
@@ -46,3 +15,35 @@ class CyberpunkTheme        selectedItemColor: Colors.cyanAccent,class Cyberpunk
 
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.black,
+        selectedItemColor: Colors.cyanAccent,
+        unselectedItemColor: Colors.white38,
+      ),
+
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(color: Colors.white70),
+      ),
+
+      cardTheme: CardThemeData(
+        color: Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+      ),
+    );
+  }
+
+  // ✅ reusable neon box
+  static BoxDecoration neonBox(Color color) {
+    return BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: color),
+      boxShadow: [
+        BoxShadow(
+          color: color.withOpacity(0.6),
+          blurRadius: 15,
+        ),
+      ],
+    );
+  }
+}
