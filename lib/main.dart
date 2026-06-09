@@ -12,6 +12,10 @@ void main() {
   );
 }
 
+///////////////////////////////////////////////////////////
+/// APP
+///////////////////////////////////////////////////////////
+
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -29,7 +33,7 @@ class App extends StatelessWidget {
 ///////////////////////////////////////////////////////////
 
 class FakeProvider extends ChangeNotifier {
-  final data = {
+  final Map<String, dynamic> data = {
     "users": 1500,
     "devices": 320,
     "alerts": 3,
@@ -95,13 +99,15 @@ class _BootScreenState extends State<BootScreen> {
             padding: const EdgeInsets.all(20),
             child: ListView(
               children: logs
-                  .map((e) => Text(
-                        e,
-                        style: const TextStyle(
-                          color: Color(0xFF39FF14),
-                          fontFamily: 'monospace',
-                        ),
-                      ))
+                  .map(
+                    (e) => Text(
+                      e,
+                      style: const TextStyle(
+                        color: Color(0xFF39FF14),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -141,7 +147,7 @@ class Dashboard extends StatelessWidget {
               card("Devices", d["devices"].toString()),
               card("Alerts", d["alerts"].toString()),
               card("VMs", d["vms"].toString()),
-              card("Billing", d["billing"]),
+              card("Billing", d["billing"]?.toString() ?? "N/A"),
             ],
           ),
         ],
@@ -225,12 +231,17 @@ class MatrixPainter extends CustomPainter {
       final tp = TextPainter(
         text: TextSpan(
           text: rand.nextBool() ? '0' : '1',
-          style: TextStyle(color: const Color(0xFF39FF14).withOpacity(opacity)),
+          style: TextStyle(
+            color: const Color(0xFF39FF14).withOpacity(opacity),
+          ),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
 
-      tp.paint(canvas, Offset(i * 12, rand.nextDouble() * size.height));
+      tp.paint(
+        canvas,
+        Offset(i * 12, rand.nextDouble() * size.height),
+      );
     }
   }
 
@@ -239,7 +250,7 @@ class MatrixPainter extends CustomPainter {
 }
 
 ///////////////////////////////////////////////////////////
-/// SCANLINES (FIXED)
+/// SCANLINES
 ///////////////////////////////////////////////////////////
 
 class ScanLines extends CustomPainter {
