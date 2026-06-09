@@ -1,7 +1,4 @@
-import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'services/dashboard_provider.dart';
 
@@ -9,159 +6,50 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => DashboardProvider()..loadConfig(),
-      child: const M365AdminCenterApp(),
+      child: const App(),
     ),
   );
 }
 
-class M365AdminCenterApp extends StatelessWidget {
-  const M365AdminCenterApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'CloudNex Enterprise',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF090D16),
-        fontFamily: 'Courier New',
-      ),
-      home: const BootSequenceWrapper(),
+      home: CyberDashboard(),
     );
   }
 }
 
 ///////////////////////////////////////////////////////////
-/// BOOT SEQUENCE (UNCHANGED LOGIC)
+/// MAIN DASHBOARD
 ///////////////////////////////////////////////////////////
 
-class BootSequenceWrapper extends StatefulWidget {
-  const BootSequenceWrapper({super.key});
-
-  @override
-  State<BootSequenceWrapper> createState() => _BootSequenceWrapperState();
-}
-
-class _BootSequenceWrapperState extends State<BootSequenceWrapper>
-    with TickerProviderStateMixin {
-  bool _bootComplete = false;
-  final List<String> _bootLogs = [];
-  int _index = 0;
-
-  final logs = [
-    ':: INITIALIZING CLOUDNEX...',
-    ':: LOADING SYSTEM...',
-    ':: VERIFYING SERVICES...',
-    ':: AUTH MODULE READY...',
-    ':: SYSTEM ONLINE'
-  ];
-
-  late AnimationController fade;
-
-  @override
-  void initState() {
-    super.initState();
-
-    fade = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-
-    runLogs();
-  }
-
-  void runLogs() {
-    if (_index < logs.length) {
-      setState(() {
-        _bootLogs.add(logs[_index++]);
-      });
-
-      Future.delayed(const Duration(milliseconds: 350), runLogs);
-    } else {
-      Future.delayed(const Duration(milliseconds: 600), () {
-        fade.forward().then((_) {
-          setState(() => _bootComplete = true);
-        });
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    fade.dispose();
-    super.dispose();
-  }
+class CyberDashboard extends StatelessWidget {
+  const CyberDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (_bootComplete) {
-      return const AdminCenterShell();
-    }
-
     return Scaffold(
-      backgroundColor: const Color(0xFF05070C),
-      body: FadeTransition(
-        opacity: Tween(begin: 1.0, end: 0.0).animate(fade),
-        child: Stack(
-          children: [
-            const Positioned.fill(child: MatrixRainCanvas()),
-            Positioned.fill(
-              child: CustomPaint(painter: CyberScanlinePainter()),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: ListView(
-                children: _bootLogs
-                    .map((e) => Text(
-                          e,
-                          style: const TextStyle(
-                            color: Color(0xFF39FF14),
-                            fontFamily: 'monospace',
-                          ),
-                        ))
-                    .toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-///////////////////////////////////////////////////////////
-/// MAIN UI (UNCHANGED STRUCTURE)
-///////////////////////////////////////////////////////////
-
-class AdminCenterShell extends StatelessWidget {
-  const AdminCenterShell({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<DashboardProvider>(context);
-    final data = provider.tenantMetrics;
-
-    if (data.isEmpty) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    return Scaffold(
+      backgroundColor: const Color(0xFF090D16),
       body: Stack(
         children: [
-          const Positioned.fill(child: MatrixRainCanvas()),
-          Positioned.fill(
-            child: CustomPaint(painter: CyberScanlinePainter()),
-          ),
-          ListView(
-            padding: const EdgeInsets.all(12),
-            children: [
-              card("Users", data["entraId"]["users"].toString()),
-              card("Devices", data["intune"]["totalDevices"].toString()),
-              card("VMs", data["azure"]["activeVMs"].toString()),
-              card("Billing", data["azure"]["monthlyBurn"].toString()),
+          const Positioned.fill(child: CyberBackground()),
+
+          Column(
+            children: const [
+              TopNavBar(),
+              TelemetryRow(),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(flex: 3, child: LeftSelector()),
+                    Expanded(flex: 7, child: TerminalPanel()),
+                  ],
+                ),
+              ),
             ],
           )
         ],
@@ -171,102 +59,250 @@ class AdminCenterShell extends StatelessWidget {
 }
 
 ///////////////////////////////////////////////////////////
-/// CARD
+/// TOP NAVBAR
 ///////////////////////////////////////////////////////////
 
-Widget card(String title, String value) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: const Color(0xFF05070C),
-      border: Border.all(color: const Color(0xFF00F0FF)),
-    ),
-    child: Row(
-      children: [
-        Text(title,
-            style: const TextStyle(color: Colors.white70, fontSize: 14)),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-              color: Color(0xFF39FF14),
-              fontWeight: FontWeight.bold),
-        ),
-      ],
-    ),
-  );
-}
-
-///////////////////////////////////////////////////////////
-/// MATRIX ENGINE (UNCHANGED)
-///////////////////////////////////////////////////////////
-
-class MatrixRainCanvas extends StatefulWidget {
-  const MatrixRainCanvas({super.key});
-
-  @override
-  State<MatrixRainCanvas> createState() => _MatrixRainCanvasState();
-}
-
-class _MatrixRainCanvasState extends State<MatrixRainCanvas> {
-  late Timer timer;
-  final random = math.Random();
-
-  @override
-  void initState() {
-    super.initState();
-    timer = Timer.periodic(const Duration(milliseconds: 60), (_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
-  }
+class TopNavBar extends StatelessWidget {
+  const TopNavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: MatrixPainter(random),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFF1F2937))),
+      ),
+      child: Row(
+        children: const [
+          Text(
+            "_CLOUDNEX",
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 18,
+              color: Colors.white,
+            ),
+          ),
+          Spacer(),
+          Text(
+            "CAPABILITIES // ENGAGED",
+            style: TextStyle(
+              color: Color(0xFF39FF14),
+              fontFamily: 'monospace',
+            ),
+          )
+        ],
+      ),
     );
   }
 }
 
-class MatrixPainter extends CustomPainter {
-  final math.Random random;
+///////////////////////////////////////////////////////////
+/// TELEMETRY ROW
+///////////////////////////////////////////////////////////
 
-  MatrixPainter(this.random);
+class TelemetryRow extends StatelessWidget {
+  const TelemetryRow({super.key});
 
   @override
-  void paint(Canvas canvas, Size size) {
-    for (int i = 0; i < size.width / 12; i++) {
-      final tp = TextPainter(
-        text: TextSpan(
-          text: random.nextBool() ? "0" : "1",
-          style: const TextStyle(color: Color(0xFF39FF14)),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      tp.paint(
-        canvas,
-        Offset(i * 12, random.nextDouble() * size.height),
-      );
-    }
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(child: TelemetryCard(Icons.shield, "100%", "Compliance")),
+        Expanded(child: TelemetryCard(Icons.terminal, "4 ACTIVE", "Runbooks")),
+        Expanded(child: TelemetryCard(Icons.favorite, "SCAN", "Health Check")),
+      ],
+    );
   }
+}
+
+class TelemetryCard extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const TelemetryCard(this.icon, this.value, this.label, {super.key});
 
   @override
-  bool shouldRepaint(_) => true;
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111827),
+        border: Border.all(color: const Color(0xFF1F2937)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF00F0FF)),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Color(0xFF39FF14),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(label, style: const TextStyle(color: Colors.grey)),
+            ],
+          )
+        ],
+      ),
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////
-/// SCANLINES
+/// LEFT PANEL
 ///////////////////////////////////////////////////////////
 
-class CyberScanlinePainter extends CustomPainter {
+class LeftSelector extends StatelessWidget {
+  const LeftSelector({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: const [
+        CategoryCard("Cloud Engineering"),
+        CategoryCard("Identity Architecture"),
+        CategoryCard("Automation"),
+      ],
+    );
+  }
+}
+
+class CategoryCard extends StatelessWidget {
+  final String title;
+
+  const CategoryCard(this.title, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111827),
+        border: Border.all(color: const Color(0xFF1F2937)),
+      ),
+      child: Text(
+        title,
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
+  }
+}
+
+///////////////////////////////////////////////////////////
+/// TERMINAL PANEL
+///////////////////////////////////////////////////////////
+
+class TerminalPanel extends StatelessWidget {
+  const TerminalPanel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF05070C),
+        border: Border.all(color: const Color(0xFF1F2937)),
+      ),
+      child: Column(
+        children: const [
+          TerminalHeader(),
+          Expanded(child: TerminalBody()),
+        ],
+      ),
+    );
+  }
+}
+
+class TerminalHeader extends StatelessWidget {
+  const TerminalHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      color: const Color(0xFF0E131F),
+      child: const Row(
+        children: [
+          CircleAvatar(radius: 4, backgroundColor: Colors.red),
+          SizedBox(width: 4),
+          CircleAvatar(radius: 4, backgroundColor: Colors.amber),
+          SizedBox(width: 4),
+          CircleAvatar(radius: 4, backgroundColor: Colors.green),
+          SizedBox(width: 10),
+          Text("capabilities.sh",
+              style: TextStyle(color: Colors.grey, fontSize: 12))
+        ],
+      ),
+    );
+  }
+}
+
+class TerminalBody extends StatelessWidget {
+  const TerminalBody({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(12),
+      child: Text(
+        "[NODE] Diagnostics Loading...\n> Awaiting input...\n> System ready.",
+        style: TextStyle(
+          color: Color(0xFF00F0FF),
+          fontFamily: 'monospace',
+        ),
+      ),
+    );
+  }
+}
+
+///////////////////////////////////////////////////////////
+/// BACKGROUND (HTML STYLE)
+///////////////////////////////////////////////////////////
+
+class CyberBackground extends StatelessWidget {
+  const CyberBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(color: const Color(0xFF090D16)),
+
+        // subtle grid
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0.04,
+            child: GridPaper(
+              color: const Color(0xFF00F0FF),
+              interval: 24,
+            ),
+          ),
+        ),
+
+        // scanlines
+        const Positioned.fill(child: ScanLines()),
+      ],
+    );
+  }
+}
+
+class ScanLines extends StatelessWidget {
+  const ScanLines({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _ScanPainter());
+  }
+}
+
+class _ScanPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
