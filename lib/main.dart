@@ -16,11 +16,83 @@ class CloudnexApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF05050A),
         primaryColor: Colors.cyanAccent,
       ),
-      home: const HomeScreen(),
+      home: const BootScreen(), // 👈 boot screen first
     );
   }
 }
 
+//
+// ✅ BOOT SCREEN (CYBERPUNK TERMINAL)
+//
+class BootScreen extends StatefulWidget {
+  const BootScreen({super.key});
+
+  @override
+  State<BootScreen> createState() => _BootScreenState();
+}
+
+class _BootScreenState extends State<BootScreen> {
+  List<String> logs = [];
+
+  final List<String> steps = [
+    "INITIALIZING CLOUDNEX CONTROL...",
+    "CONNECTING TO AZURE...",
+    "SYNCING DIRECTORY...",
+    "ACCESS GRANTED"
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    runBoot();
+  }
+
+  void runBoot() async {
+    for (var step in steps) {
+      await Future.delayed(const Duration(seconds: 1));
+      setState(() {
+        logs.add(step);
+      });
+    }
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: logs
+                .map((line) => Text(
+                      line,
+                      style: const TextStyle(
+                        color: Colors.greenAccent,
+                        fontSize: 16,
+                        fontFamily: 'Courier',
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//
+// ✅ MAIN HOME SCREEN
+//
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -71,8 +143,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class DashboardScreen extends StatelessWidget {
+//
+// ✅ DASHBOARD WITH LIVE DATA
+//
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int devices = 20;
+  int users = 100;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔥 LIVE DATA simulation
+    Stream.periodic(const Duration(seconds: 2)).listen((_) {
+      setState(() {
+        devices++;
+        users += 2;
+
+        if (devices > 40) devices = 20;
+        if (users > 150) users = 100;
+      });
+    });
+  }
 
   Widget buildCard(String title, String value, IconData icon) {
     return Container(
@@ -82,6 +181,12 @@ class DashboardScreen extends StatelessWidget {
         color: Colors.black,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.cyanAccent),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withOpacity(0.4),
+            blurRadius: 10,
+          )
+        ],
       ),
       child: Row(
         children: [
@@ -94,9 +199,10 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                    color: Colors.cyanAccent,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.cyanAccent,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           )
@@ -111,13 +217,16 @@ class DashboardScreen extends StatelessWidget {
       children: [
         buildCard("Backup Status", "OK", Icons.check_circle),
         buildCard("Azure Status", "ONLINE", Icons.cloud),
-        buildCard("Devices", "28", Icons.devices),
-        buildCard("Users", "112", Icons.group),
+        buildCard("Devices", "$devices", Icons.devices),
+        buildCard("Users", "$users", Icons.group),
       ],
     );
   }
 }
 
+//
+// ✅ MODULE PLACEHOLDER
+//
 class ModuleScreen extends StatelessWidget {
   final String title;
 
@@ -129,9 +238,10 @@ class ModuleScreen extends StatelessWidget {
       child: Text(
         "$title Module",
         style: const TextStyle(
-            color: Colors.cyanAccent,
-            fontSize: 22,
-            fontWeight: FontWeight.bold),
+          color: Colors.cyanAccent,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
