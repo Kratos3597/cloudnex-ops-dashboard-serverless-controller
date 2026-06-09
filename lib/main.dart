@@ -25,6 +25,20 @@ class App extends StatelessWidget {
 }
 
 ///////////////////////////////////////////////////////////
+/// PROVIDER
+///////////////////////////////////////////////////////////
+
+class FakeProvider extends ChangeNotifier {
+  final data = {
+    "users": 1500,
+    "devices": 320,
+    "alerts": 3,
+    "vms": 45,
+    "billing": "\$12,300"
+  };
+}
+
+///////////////////////////////////////////////////////////
 /// BOOT SCREEN
 ///////////////////////////////////////////////////////////
 
@@ -37,33 +51,31 @@ class BootScreen extends StatefulWidget {
 
 class _BootScreenState extends State<BootScreen> {
   final logs = <String>[];
+  int i = 0;
 
   final messages = [
     'BOOTING CLOUDNEX CORE...',
-    'INJECTING MATRIX DRIVER...',
-    'CONNECTING TO AZURE GRID...',
-    'ENABLING ENTRA AUTH...',
-    'SECURITY LAYERS: ACTIVE',
+    'CONNECTING TO CLOUD...',
+    'INITIALIZING SECURITY...',
+    'LOADING MODULES...',
     'SYSTEM ONLINE ✅'
   ];
-
-  int i = 0;
 
   @override
   void initState() {
     super.initState();
-    runLogs();
+    _runLogs();
   }
 
-  void runLogs() {
+  void _runLogs() {
     if (i < messages.length) {
       setState(() => logs.add(messages[i++]));
-      Future.delayed(const Duration(milliseconds: 350), runLogs);
+      Future.delayed(const Duration(milliseconds: 300), _runLogs);
     } else {
       Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const Login()),
+          MaterialPageRoute(builder: (_) => const Dashboard()),
         );
       });
     }
@@ -71,14 +83,16 @@ class _BootScreenState extends State<BootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF05070C),
+    return Scaffold(
+      backgroundColor: const Color(0xFF05070C),
       body: Stack(
         children: [
-          Positioned.fill(child: MatrixRain()),
-          Positioned.fill(child: ScanLines()), // ✅ FIXED
+          const Positioned.fill(child: MatrixRain()),
+          Positioned.fill(
+            child: CustomPaint(painter: ScanLines()),
+          ),
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             child: ListView(
               children: logs
                   .map((e) => Text(
@@ -86,59 +100,15 @@ class _BootScreenState extends State<BootScreen> {
                         style: const TextStyle(
                           color: Color(0xFF39FF14),
                           fontFamily: 'monospace',
-                          shadows: [
-                            Shadow(
-                                color: Color(0xFF39FF14), blurRadius: 6)
-                          ],
                         ),
                       ))
                   .toList(),
             ),
-          )
+          ),
         ],
       ),
     );
   }
-}
-
-///////////////////////////////////////////////////////////
-/// LOGIN
-///////////////////////////////////////////////////////////
-
-class Login extends StatelessWidget {
-  const Login({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF090D16),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const Dashboard()),
-            );
-          },
-          child: const Text('ACCESS SYSTEM'),
-        ),
-      ),
-    );
-  }
-}
-
-///////////////////////////////////////////////////////////
-/// PROVIDER (FAKE DATA)
-///////////////////////////////////////////////////////////
-
-class FakeProvider extends ChangeNotifier {
-  final data = {
-    "users": 1532,
-    "devices": 342,
-    "alerts": 4,
-    "vms": 58,
-    "billing": "\$13,212"
-  };
 }
 
 ///////////////////////////////////////////////////////////
@@ -155,27 +125,25 @@ class Dashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF090D16),
       appBar: AppBar(
-        title: const Text('CLOUDNEX CONTROL CORE'),
+        title: const Text('CLOUDNEX CORE'),
         backgroundColor: const Color(0xFF111827),
       ),
-      body: const Stack(
+      body: Stack(
         children: [
-          Positioned.fill(child: MatrixRain(opacity: 0.05)),
-          Positioned.fill(child: ScanLines()), // ✅ FIXED
+          const Positioned.fill(child: MatrixRain(opacity: 0.05)),
+          Positioned.fill(
+            child: CustomPaint(painter: ScanLines()),
+          ),
           ListView(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             children: [
-              cyberCard('USERS', d['users'].toString()),
-              cyberCard('DEVICES', d['devices'].toString()),
-              cyberCard('ALERTS', d['alerts'].toString()),
-              cyberCard('VMS', d['vms'].toString()),
-              cyberCard('BILLING', d['billing']),
-              SizedBox(height: 20),
-              Text('LIVE EVENT STREAM',
-                  style: TextStyle(color: Colors.orange)),
-              ...List.generate(6, (i) => logItem(i)),
+              card("Users", d["users"].toString()),
+              card("Devices", d["devices"].toString()),
+              card("Alerts", d["alerts"].toString()),
+              card("VMs", d["vms"].toString()),
+              card("Billing", d["billing"]),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -183,10 +151,10 @@ class Dashboard extends StatelessWidget {
 }
 
 ///////////////////////////////////////////////////////////
-/// CYBER CARD
+/// CARD
 ///////////////////////////////////////////////////////////
 
-Widget cyberCard(String title, String value) {
+Widget card(String title, String value) {
   return Container(
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(16),
@@ -203,22 +171,9 @@ Widget cyberCard(String title, String value) {
           style: const TextStyle(
             color: Color(0xFF39FF14),
             fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(blurRadius: 8, color: Color(0xFF39FF14))
-            ],
           ),
         ),
       ],
-    ),
-  );
-}
-
-Widget logItem(int i) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Text(
-      ':: EVENT $i → SYSTEM CHECK OK',
-      style: const TextStyle(color: Colors.greenAccent, fontSize: 12),
     ),
   );
 }
@@ -266,38 +221,32 @@ class MatrixPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (int i = 0; i < size.width / 10; i++) {
+    for (int i = 0; i < size.width / 12; i++) {
       final tp = TextPainter(
         text: TextSpan(
           text: rand.nextBool() ? '0' : '1',
-          style: TextStyle(
-              color: const Color(0xFF39FF14).withValues(alpha: opacity)),
+          style: TextStyle(color: const Color(0xFF39FF14).withOpacity(opacity)),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
 
-      tp.paint(
-        canvas,
-        Offset(i * 10, rand.nextDouble() * size.height),
-      );
+      tp.paint(canvas, Offset(i * 12, rand.nextDouble() * size.height));
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(_) => true;
 }
 
 ///////////////////////////////////////////////////////////
-/// SCANLINES ✅ FIXED CONST CONSTRUCTOR
+/// SCANLINES (FIXED)
 ///////////////////////////////////////////////////////////
 
 class ScanLines extends CustomPainter {
-  const ScanLines(); // ✅ THIS FIXES YOUR ERROR
-
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.15)
+      ..color = Colors.black.withOpacity(0.15)
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += 4) {
@@ -306,6 +255,5 @@ class ScanLines extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(_) => false;
 }
-``
