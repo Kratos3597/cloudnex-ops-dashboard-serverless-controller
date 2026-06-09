@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/neon_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -31,7 +32,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (devices > 40) devices = 20;
         if (users > 150) users = 100;
 
-        // Random status change simulation
         if (devices % 5 == 0) {
           backupStatus = "WARNING";
           alerts.insert(0, "⚠ Backup delay detected");
@@ -60,44 +60,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       default:
         return Colors.cyanAccent;
     }
-  }
-
-  Widget neonCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withOpacity(0.7)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.6),
-            blurRadius: 15,
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 36, color: color),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: TextStyle(color: color.withOpacity(0.8))),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            ],
-          )
-        ],
-      ),
-    );
   }
 
   Widget alertPanel() {
@@ -144,7 +106,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // 🔥 GRID LAYOUT
+          // 🔥 GRID LAYOUT WITH NeonCard
           Padding(
             padding: const EdgeInsets.all(10),
             child: GridView.count(
@@ -154,13 +116,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisSpacing: 10,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                neonCard("Backup", backupStatus, Icons.storage,
-                    getStatusColor(backupStatus)),
-                neonCard("Azure", "ONLINE", Icons.cloud, Colors.cyanAccent),
-                neonCard("Devices", "$devices", Icons.devices,
-                    Colors.purpleAccent),
-                neonCard("Users", "$users", Icons.group,
-                    Colors.orangeAccent),
+                NeonCard(
+                  title: "Backup",
+                  value: backupStatus,
+                  icon: Icons.storage,
+                  color: getStatusColor(backupStatus),
+                ),
+                const NeonCard(
+                  title: "Azure",
+                  value: "ONLINE",
+                  icon: Icons.cloud,
+                  color: Colors.cyanAccent,
+                ),
+                NeonCard(
+                  title: "Devices",
+                  value: "$devices",
+                  icon: Icons.devices,
+                  color: Colors.purpleAccent,
+                ),
+                NeonCard(
+                  title: "Users",
+                  value: "$users",
+                  icon: Icons.group,
+                  color: Colors.orangeAccent,
+                ),
               ],
             ),
           ),
