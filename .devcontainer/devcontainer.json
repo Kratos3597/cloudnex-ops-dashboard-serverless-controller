@@ -3,21 +3,12 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "features": {
-    "ghcr.io/devcontainers/features/android:1": {
-      "commandLineTools": "latest",
-      "platformTools": "latest",
-      "emulator": "false" 
-    }
-  },
   "customizations": {
     "vscode": {
       "settings": {
-        "flutter.sdkPath": "/usr/local/flutter"
-      }
+        "dart.flutterSdkPath": "/home/vscode/flutter"
+      },
+      "extensions": ["dart-code.flutter"]
     }
-  },
-  "mounts": [
-    "source=android-sdk,target=/home/vscode/Android/Sdk,type=volume"
-  ]
+  }
 }
