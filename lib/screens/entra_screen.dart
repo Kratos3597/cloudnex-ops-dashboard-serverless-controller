@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';import 'super.key});
+import 'package:flutter/material.dart';
+
+class EntraScreen extends StatefulWidget {
+  const EntraScreen({super.key});
 
   @override
   State<EntraScreen> createState() => _EntraScreenState();
@@ -17,25 +20,21 @@ class _EntraScreenState extends State<EntraScreen> {
   @override
   void initState() {
     super.initState();
-
-    // 🔥 simulate status changes
     Stream.periodic(const Duration(seconds: 4)).listen((_) {
-      setState(() {
-        users.shuffle(); // makes UI feel dynamic
-      });
+      if (mounted) {
+        setState(() {
+          users.shuffle();
+        });
+      }
     });
   }
 
   Color getRoleColor(String role) {
     switch (role) {
-      case "Admin":
-        return Colors.redAccent;
-      case "User":
-        return Colors.greenAccent;
-      case "Guest":
-        return Colors.orangeAccent;
-      default:
-        return Colors.cyanAccent;
+      case "Admin": return Colors.redAccent;
+      case "User": return Colors.greenAccent;
+      case "Guest": return Colors.orangeAccent;
+      default: return Colors.cyanAccent;
     }
   }
 
@@ -46,13 +45,11 @@ class _EntraScreenState extends State<EntraScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredUsers = users
-        .where((user) =>
-            user["name"].toLowerCase().contains(searchQuery.toLowerCase()))
+        .where((user) => user["name"].toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
 
     return Column(
       children: [
-        // 🔍 SEARCH BAR
         Padding(
           padding: const EdgeInsets.all(12),
           child: TextField(
@@ -63,84 +60,32 @@ class _EntraScreenState extends State<EntraScreen> {
               prefixIcon: const Icon(Icons.search, color: Colors.cyanAccent),
               filled: true,
               fillColor: Colors.black,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Colors.cyanAccent),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
             ),
-            onChanged: (value) {
-              setState(() {
-                searchQuery = value;
-              });
-            },
+            onChanged: (value) => setState(() => searchQuery = value),
           ),
         ),
-
-        // 👥 USER LIST
         Expanded(
           child: ListView.builder(
             itemCount: filteredUsers.length,
             itemBuilder: (context, index) {
               final user = filteredUsers[index];
               Color roleColor = getRoleColor(user["role"]);
-              Color statusColor = getStatusColor(user["status"]);
-
+              
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: roleColor),
-                  boxShadow: [
-                    BoxShadow(
-                      color: roleColor.withOpacity(0.6),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
+                decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(18), border: Border.all(color: roleColor)),
                 child: Row(
                   children: [
                     Icon(Icons.person, color: roleColor, size: 32),
                     const SizedBox(width: 12),
-
-                    // User Info
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          user["name"],
-                          style: TextStyle(
-                            color: roleColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          "Role: ${user["role"]}",
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        Text(
-                          "Status: ${user["status"]}",
-                          style: TextStyle(color: statusColor),
-                        ),
+                        Text(user["name"], style: TextStyle(color: roleColor, fontWeight: FontWeight.bold)),
+                        Text("Role: ${user["role"]}", style: const TextStyle(color: Colors.white70)),
                       ],
-                    ),
-
-                    const Spacer(),
-
-                    // ACTION BUTTON
-                    IconButton(
-                      icon: const Icon(Icons.lock_reset,
-                          color: Colors.cyanAccent),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                Text("Reset password for ${user["name"]}"),
-                          ),
-                        );
-                      },
                     ),
                   ],
                 ),
@@ -152,5 +97,3 @@ class _EntraScreenState extends State<EntraScreen> {
     );
   }
 }
-
-class EntraScreen extends StatefulWidget {

@@ -14,7 +14,7 @@ class CloudnexApp extends StatelessWidget {
       title: 'Cloudnex Control',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const BootScreen(),
+      home: BootScreen(),
     );
   }
 }

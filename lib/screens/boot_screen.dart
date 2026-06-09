@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home({super.key});import 'home_screen.dart';
+import 'home_screen.dart';
+
+class BootScreen extends StatefulWidget {
+  const BootScreen({super.key});
 
   @override
   State<BootScreen> createState() => _BootScreenState();
@@ -25,23 +28,16 @@ class _BootScreenState extends State<BootScreen> {
   Future<void> runBootSequence() async {
     for (var step in steps) {
       await Future.delayed(const Duration(milliseconds: 900));
-
       if (!mounted) return;
-
       setState(() {
         logs.add(step);
       });
     }
-
     await Future.delayed(const Duration(milliseconds: 800));
-
     if (!mounted) return;
-
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 
@@ -51,30 +47,23 @@ class _BootScreenState extends State<BootScreen> {
       backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: logs.map((line) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  line,
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 16,
-                    fontFamily: 'Courier',
-                    letterSpacing: 1.2,
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: logs.map((line) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                line,
+                style: const TextStyle(
+                  color: Colors.greenAccent,
+                  fontSize: 16,
+                  fontFamily: 'Courier',
                 ),
-              );
-            }).toList(),
-          ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
   }
 }
-
-
-class BootScreen extends StatefulWidget {
