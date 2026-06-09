@@ -1,78 +1,79 @@
 import 'package:flutter/material.dart';
-import 'dashboard_screen.dart';
-import 'veeam_screen.dart';
-import 'azure_screen.dart';
-import 'entra_screen.dart';
-import 'intune_screen.dart';
-import 'ad_screen.dart';
+import 'home_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class BootScreen extends StatefulWidget {
+  const BootScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<BootScreen> createState() => _BootScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = const [
-    DashboardScreen(),
-    VeeamScreen(),
-    AzureScreen(),
-    EntraScreen(),
-    IntuneScreen(),
-    ADScreen(),
+class _BootScreenState extends State<BootScreen> {
+  final List<String> steps = [
+    "INITIALIZING CLOUDNEX CONTROL...",
+    "CONNECTING TO AZURE...",
+    "SYNCING DIRECTORY...",
+    "LOADING SECURITY MODULES...",
+    "ACCESS GRANTED"
   ];
 
-  final List<String> _titles = [
-    "Dashboard",
-    "Veeam Backup",
-    "Azure",
-    "Entra ID",
-    "Intune",
-    "Active Directory"
-  ];
+  List<String> logs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    runBootSequence();
+  }
+
+  Future<void> runBootSequence() async {
+    for (var step in steps) {
+      await Future.delayed(const Duration(milliseconds: 900));
+
+      if (!mounted) return;
+
+      setState(() {
+        logs.add(step);
+      });
+    }
+
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_currentIndex]),
-        backgroundColor: Colors.black,
-        elevation: 0,
-      ),
-
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _screens[_currentIndex],
-      ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.cyanAccent,
-        unselectedItemColor: Colors.white38,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard), label: "Home"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.storage), label: "Veeam"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.cloud), label: "Azure"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.security), label: "Entra"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.devices), label: "Intune"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.group), label: "AD"),
-        ],
+      backgroundColor: Colors.black,
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: logs.map((line) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  line,
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontSize: 16,
+                    fontFamily: 'Courier',
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ),
     );
   }
