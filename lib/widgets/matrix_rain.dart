@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class MatrixRain extends StatefulWidget {
   final double progress;
+  final double depth;
 
-  const MatrixRain({super.key, required this.progress});
+  const MatrixRain({
+    super.key,
+    required this.progress,
+    this.depth = 1.0,
+  });
 
   @override
   State<MatrixRain> createState() => _MatrixRainState();
@@ -22,11 +26,13 @@ class _MatrixRainState extends State<MatrixRain> {
   final List<String> chars =
       "010101ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#\$%&*+-/<>[]{}".split("");
 
-  double fontSize = 9; // ✅ DENSE MATRIX (IMPORTANT)
+  late double fontSize;
 
   @override
   void initState() {
     super.initState();
+
+    fontSize = widget.depth > 0.5 ? 9 : 12;
 
     timer = Timer.periodic(const Duration(milliseconds: 33), (_) {
       if (mounted) setState(() {});
@@ -43,7 +49,7 @@ class _MatrixRainState extends State<MatrixRain> {
 
     speeds = List.generate(
       columns,
-      (_) => random.nextInt(3) + 1,
+      (_) => random.nextInt(2) + 1,
     );
   }
 
@@ -69,7 +75,7 @@ class _MatrixRainState extends State<MatrixRain> {
         chars: chars,
         fontSize: fontSize,
         progress: widget.progress,
-        random: random,
+        depth: widget.depth,
       ),
     );
   }
@@ -81,7 +87,7 @@ class MatrixPainter extends CustomPainter {
   final List<String> chars;
   final double fontSize;
   final double progress;
-  final Random random;
+  final double depth;
 
   MatrixPainter({
     required this.drops,
@@ -89,48 +95,40 @@ class MatrixPainter extends CustomPainter {
     required this.chars,
     required this.fontSize,
     required this.progress,
-    required this.random,
+    required this.depth,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // ✅ TRAIL FADE (like your website)
-    final fadePaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.05);
+    // ✅ trail fade
+    final paint = Paint()
+      ..color = Colors.black.withValues(alpha: depth < 0.5 ? 0.03 : 0.05);
 
-    canvas.drawRect(Offset.zero & size, fadePaint);
+    canvas.drawRect(Offset.zero & size, paint);
 
     for (int i = 0; i < drops.length; i++) {
-
-      // ✅ SPEED SYNC WITH PROGRESS
-      double speedBoost = progress * 4;
-
+      double speedBoost = progress * 1.2;
       drops[i] += speeds[i] + speedBoost;
 
-      // ✅ RESET
       if (drops[i] * fontSize > size.height &&
-          random.nextDouble() > 0.95) {
+          Random().nextDouble() > 0.97) {
         drops[i] = 0;
       }
 
-      // ✅ DRAW TRAILING STREAK (MULTI CHAR COLUMN 🔥)
-      for (int trail = 0; trail < 10; trail++) {
-        int index = (drops[i] - trail).toInt();
-        if (index < 0) continue;
+      for (int trail = 0; trail < (depth > 0.5 ? 10 : 6); trail++) {
+        int y = (drops[i] - trail).toInt();
+        if (y < 0) continue;
 
-        String char = chars[random.nextInt(chars.length)];
+        String char = chars[(i + trail) % chars.length];
 
-        // ✅ TRAIL FADE GRADIENT
-        double opacity = (1 - (trail / 10)).clamp(0.0, 1.0);
+        double opacity = (1 - (trail / 10)).clamp(0.2, 1.0);
 
         Color color;
 
-        if (trail == 0) {
-          // ✅ BRIGHT HEAD (white glow)
+        if (trail == 0 && depth > 0.5) {
           color = Colors.white;
         } else {
-          color = const Color(0xFF39FF14)
-              .withValues(alpha: opacity * 0.9);
+          color = const Color(0xFF39FF14).withValues(alpha: opacity);
         }
 
         final textPainter = TextPainter(
@@ -149,12 +147,14 @@ class MatrixPainter extends CustomPainter {
 
         textPainter.paint(
           canvas,
-          Offset(i * (fontSize - 1), index * fontSize),
+          Offset(i * (fontSize - 1), y * fontSize),
         );
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
 }

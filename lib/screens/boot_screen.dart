@@ -46,7 +46,7 @@ class _BootScreenState extends State<BootScreen>
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
 
-    // ✅ Status updater (synced with system feel)
+    // ✅ Status updates
     Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (!mounted) return;
 
@@ -65,7 +65,7 @@ class _BootScreenState extends State<BootScreen>
 
   Future<void> startBoot() async {
     for (int i = 0; i <= 100; i++) {
-      await Future.delayed(const Duration(milliseconds: 26)); // ✅ matches web timing
+      await Future.delayed(const Duration(milliseconds: 26));
 
       if (!mounted) return;
 
@@ -76,7 +76,7 @@ class _BootScreenState extends State<BootScreen>
 
     await Future.delayed(const Duration(milliseconds: 300));
 
-    // ✅ Cinematic shutdown (zoom + blur + fade)
+    // ✅ Cinematic exit
     setState(() {
       opacity = 0;
       scale = 1.08;
@@ -108,7 +108,7 @@ class _BootScreenState extends State<BootScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    double titleSize = size.width * 0.12; // ✅ bigger text
+    double titleSize = size.width * 0.12;
     double subTitleSize = size.width * 0.045;
     double barWidth = size.width * 0.6;
 
@@ -124,29 +124,44 @@ class _BootScreenState extends State<BootScreen>
             backgroundColor: Colors.black,
             body: Stack(
               children: [
-                // ✅ MATRIX (SYNCED + STRONG)
+                // 🔥 BACKGROUND MATRIX (slow + faint depth)
                 Opacity(
-                  opacity: 0.5,
-                  child: MatrixRain(progress: progress),
+                  opacity: 0.25,
+                  child: MatrixRain(
+                    progress: progress,
+                    depth: 0.3,
+                  ),
                 ),
 
-                // ✅ LIGHT OVERLAY (keeps matrix visible)
+                // 🔥 FOREGROUND MATRIX (fast + bright)
+                Opacity(
+                  opacity: 0.6,
+                  child: MatrixRain(
+                    progress: progress,
+                    depth: 1.0,
+                  ),
+                ),
+
+                // ✅ LIGHT OVERLAY (balanced)
                 Container(
-                  color: Colors.black.withValues(alpha: 0.35),
+                  color: Colors.black.withValues(alpha: 0.3),
                 ),
 
-                // ✅ CENTER TERMINAL STYLE UI
+                // ✅ TERMINAL UI
                 Center(
                   child: Container(
                     width: size.width > 400 ? 400 : size.width * 0.85,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(220, 5, 7, 12),
-                      border: Border.all(color: Colors.greenAccent),
+                      border: Border.all(
+                        color: const Color(0xFF39FF14), // ✅ neon green
+                      ),
                       borderRadius: BorderRadius.circular(4),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.greenAccent.withValues(alpha: 0.2),
+                          color:
+                              const Color(0xFF39FF14).withValues(alpha: 0.2),
                           blurRadius: 25,
                         )
                       ],
@@ -159,7 +174,7 @@ class _BootScreenState extends State<BootScreen>
                         const Text(
                           "> INITIALIZING CORE_BOOT_LOG...",
                           style: TextStyle(
-                            color: Colors.greenAccent,
+                            color: Color(0xFF39FF14),
                             fontFamily: 'monospace',
                             fontSize: 12,
                           ),
@@ -167,7 +182,7 @@ class _BootScreenState extends State<BootScreen>
 
                         const SizedBox(height: 8),
 
-                        // ✅ STATUS TEXT
+                        // ✅ STATUS
                         Text(
                           currentStatus,
                           style: const TextStyle(
@@ -178,7 +193,7 @@ class _BootScreenState extends State<BootScreen>
 
                         const SizedBox(height: 16),
 
-                        // ✅ CLOUDNEX LOGO TEXT
+                        // ✅ CLOUDNEX (glow)
                         AnimatedBuilder(
                           animation: _glowAnimation,
                           builder: (_, __) {
@@ -234,18 +249,20 @@ class _BootScreenState extends State<BootScreen>
                         // ✅ FOOTER STATUS
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Text(
+                          children: const [
+                            Text(
                               "DECRYPTION_STAGE",
                               style: TextStyle(
                                   color: Colors.cyanAccent, fontSize: 11),
                             ),
-                            const SizedBox(width: 4),
-                            Container(
+                            SizedBox(width: 4),
+                            SizedBox(
                               width: 6,
                               height: 12,
-                              color: Colors.greenAccent,
-                            )
+                              child: ColoredBox(
+                                color: Color(0xFF39FF14),
+                              ),
+                            ),
                           ],
                         ),
                       ],
