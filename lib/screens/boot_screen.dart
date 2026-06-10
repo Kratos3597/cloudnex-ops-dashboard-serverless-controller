@@ -9,43 +9,62 @@ class BootScreen extends StatefulWidget {
   State<BootScreen> createState() => _BootScreenState();
 }
 
-class _BootScreenState extends State<BootScreen> {
-  List<String> logs = [];
+class _BootScreenState extends State<BootScreen>
+    with TickerProviderStateMixin {
   double opacity = 1.0;
+  double progress = 0;
 
-  final List<String> steps = [
-    "INITIALIZING CORE...",
-    "LOADING POWER MODULES...",
-    "CONNECTING TO AZURE...",
-    "SYNCING DIRECTORY...",
-    "STABILIZING NETWORK...",
-    "ACCESS GRANTED"
-  ];
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
+
+  double logoScale = 0.8;
+  double logoOpacity = 0.0;
 
   @override
   void initState() {
     super.initState();
+
+    // ✅ Glow animation
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _glowAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+
+    // ✅ Logo fade + scale animation
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
+
+      setState(() {
+        logoScale = 1.0;
+        logoOpacity = 1.0;
+      });
+    });
+
     startBoot();
   }
 
   Future<void> startBoot() async {
-    for (var step in steps) {
-      await Future.delayed(const Duration(milliseconds: 700));
+    for (int i = 0; i <= 100; i++) {
+      await Future.delayed(const Duration(milliseconds: 20));
 
       if (!mounted) return;
 
       setState(() {
-        logs.add(step);
+        progress = i / 100;
       });
     }
 
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 400));
 
     setState(() {
       opacity = 0;
     });
 
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 600));
 
     if (!mounted) return;
 
@@ -61,89 +80,145 @@ class _BootScreenState extends State<BootScreen> {
   }
 
   @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    double titleSize = size.width * 0.08;
+    double subTitleSize = size.width * 0.03;
+    double barWidth = size.width * 0.5;
+
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 600),
       opacity: opacity,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            const MatrixRain(), // ✅ matrix background
+            // ✅ Subtle Matrix Background
+            const Opacity(
+              opacity: 0.08,
+              child: MatrixRain(),
+            ),
 
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 40),
+            // ✅ Dark overlay (clean SaaS look)
+            Container(
+              color: Colors.black.withValues(alpha: 0.85),
+            ),
 
-                    // 🔥 TITLE
-                    const Text(
-                      "CLOUDNEX CONTROL",
-                      style: TextStyle(
-                        color: Colors.cyanAccent,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // 🔥 CENTERED TERMINAL
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ...logs.map((line) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                children: [
-                                  const Text(
-                                    "> ",
-                                    style: TextStyle(
-                                      color: Colors.greenAccent,
-                                      fontFamily: 'FiraCode',
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      line,
-                                      style: const TextStyle(
-                                        color: Colors.greenAccent,
-                                        fontFamily: 'FiraCode',
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-
-                          const SizedBox(height: 10),
-
-                          // 🔥 CURSOR
-                          const Text(
-                            "_",
+            // ✅ Center content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 🔥 LOGO (animated + glow)
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 800),
+                    opacity: logoOpacity,
+                    child: AnimatedScale(
+                      duration: const Duration(milliseconds: 800),
+                      scale: logoScale,
+                      curve: Curves.easeOut,
+                      child: AnimatedBuilder(
+                        animation: _glowAnimation,
+                        builder: (_, __) {
+                          return Text(
+                            "CLOUDNEX",
                             style: TextStyle(
-                              color: Colors.greenAccent,
-                              fontFamily: 'FiraCode',
-                              fontSize: 18,
+                              color: Colors.cyanAccent,
+                              fontSize: titleSize,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 4,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.cyanAccent.withValues(
+                                      alpha: _glowAnimation.value),
+                                  blurRadius: 25,
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                  SizedBox(height: size.height * 0.01),
+
+                  // ✅ Subtitle
+                  Text(
+                    "CONTROL PLATFORM",
+                    style: TextStyle(
+                      color: Colors.white38,
+                      fontSize: subTitleSize,
+                      letterSpacing: 3,
+                    ),
+                  ),
+
+                  SizedBox(height: size.height * 0.06),
+
+                  // ✅ Progress bar
+                  Container(
+                    width: barWidth,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: Colors.white10,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        width: barWidth * progress,
+                        height: 2,
+                        color: Colors.cyanAccent,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: size.height * 0.025),
+
+                  // ✅ Percentage
+                  Text(
+                    "${(progress * 100).toInt()}%",
+                    style: TextStyle(
+                      color: Colors.white30,
+                      fontSize: subTitleSize,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+
+                  SizedBox(height: size.height * 0.03),
+
+                  // ✅ Welcome message (fades in later)
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 800),
+                    opacity: progress > 0.8 ? 1 : 0,
+                    child: Column(
+                      children: const [
+                        Text(
+                          "Welcome to Cloudnex Dashboard",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          "Engineered by Mohammed Sheik",
+                          style: TextStyle(
+                            color: Colors.white30,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
