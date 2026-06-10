@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
@@ -23,7 +24,12 @@ class _BootScreenState extends State<BootScreen>
   late Animation<double> _glowAnimation;
 
   int statusIndex = 0;
-  String currentStatus = "Mapping infrastructure configurations...";
+
+  // ✅ TYPING EFFECT STATE
+  String displayedText = "";
+  String fullText = "Mapping infrastructure configurations...";
+  int typingIndex = 0;
+  Timer? typingTimer;
 
   final List<String> statusTexts = [
     "Mapping infrastructure configurations...",
@@ -46,21 +52,44 @@ class _BootScreenState extends State<BootScreen>
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
 
-    // ✅ Status updates
+    // ✅ Start first typing
+    startTyping(statusTexts[0]);
+
+    // ✅ Status update with typing
     Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (!mounted) return;
 
+      if (statusIndex < statusTexts.length - 1) {
+        statusIndex++;
+        startTyping(statusTexts[statusIndex]);
+      } else {
+        timer.cancel();
+      }
+    });
+
+    startBoot();
+  }
+
+  void startTyping(String newText) {
+    typingTimer?.cancel();
+
+    fullText = newText;
+    typingIndex = 0;
+    displayedText = "";
+
+    typingTimer =
+        Timer.periodic(const Duration(milliseconds: 15), (timer) {
+      if (!mounted) return;
+
       setState(() {
-        if (statusIndex < statusTexts.length - 1) {
-          statusIndex++;
-          currentStatus = statusTexts[statusIndex];
+        if (typingIndex < fullText.length) {
+          displayedText += fullText[typingIndex];
+          typingIndex++;
         } else {
           timer.cancel();
         }
       });
     });
-
-    startBoot();
   }
 
   Future<void> startBoot() async {
@@ -76,7 +105,6 @@ class _BootScreenState extends State<BootScreen>
 
     await Future.delayed(const Duration(milliseconds: 300));
 
-    // ✅ Cinematic exit
     setState(() {
       opacity = 0;
       scale = 1.08;
@@ -100,6 +128,7 @@ class _BootScreenState extends State<BootScreen>
 
   @override
   void dispose() {
+    typingTimer?.cancel();
     _glowController.dispose();
     super.dispose();
   }
@@ -124,27 +153,32 @@ class _BootScreenState extends State<BootScreen>
             backgroundColor: Colors.black,
             body: Stack(
               children: [
-                // 🔥 BACKGROUND MATRIX (slow + faint depth)
+                // ✅ BACK MATRIX
                 Opacity(
                   opacity: 0.25,
-                  child: MatrixRain(
-                    progress: progress,
-                    depth: 0.3,
-                  ),
+                  child: MatrixRain(progress: progress, depth: 0.3),
                 ),
 
-                // 🔥 FOREGROUND MATRIX (fast + bright)
+                // ✅ FRONT MATRIX
                 Opacity(
                   opacity: 0.6,
-                  child: MatrixRain(
-                    progress: progress,
-                    depth: 1.0,
+                  child: MatrixRain(progress: progress, depth: 1.0),
+                ),
+
+                // ✅ CRT SCANLINES 🔥
+                IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.08,
+                    child: CustomPaint(
+                      size: Size.infinite,
+                      painter: ScanlinePainter(),
+                    ),
                   ),
                 ),
 
-                // ✅ LIGHT OVERLAY (balanced)
+                // ✅ Overlay
                 Container(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black.withValues(alpha: 0.25),
                 ),
 
                 // ✅ TERMINAL UI
@@ -154,14 +188,12 @@ class _BootScreenState extends State<BootScreen>
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(220, 5, 7, 12),
-                      border: Border.all(
-                        color: const Color(0xFF39FF14), // ✅ neon green
-                      ),
+                      border: Border.all(color: const Color(0xFF39FF14)),
                       borderRadius: BorderRadius.circular(4),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              const Color(0xFF39FF14).withValues(alpha: 0.2),
+                          color: const Color(0xFF39FF14)
+                              .withValues(alpha: 0.2),
                           blurRadius: 25,
                         )
                       ],
@@ -170,7 +202,6 @@ class _BootScreenState extends State<BootScreen>
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ✅ TERMINAL HEADER
                         const Text(
                           "> INITIALIZING CORE_BOOT_LOG...",
                           style: TextStyle(
@@ -182,35 +213,46 @@ class _BootScreenState extends State<BootScreen>
 
                         const SizedBox(height: 8),
 
-                        // ✅ STATUS
-                        Text(
-                          currentStatus,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
+                        // ✅ TYPING + FLICKER 🔥
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 100),
+                          opacity:
+                              Random().nextDouble() > 0.1 ? 1 : 0.5,
+                          child: Text(
+                            displayedText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 16),
 
-                        // ✅ CLOUDNEX (glow)
+                        // ✅ GLITCH EFFECT (subtle)
                         AnimatedBuilder(
                           animation: _glowAnimation,
                           builder: (_, __) {
-                            return Text(
-                              "CLOUDNEX",
-                              style: TextStyle(
-                                color: Colors.cyanAccent,
-                                fontSize: titleSize,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 4,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.cyanAccent.withValues(
-                                        alpha: _glowAnimation.value),
-                                    blurRadius: 35,
-                                  ),
-                                ],
+                            return Transform.translate(
+                              offset: Offset(
+                                Random().nextDouble() * 1.2,
+                                Random().nextDouble() * 1.2,
+                              ),
+                              child: Text(
+                                "CLOUDNEX",
+                                style: TextStyle(
+                                  color: Colors.cyanAccent,
+                                  fontSize: titleSize,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 4,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.cyanAccent.withValues(
+                                          alpha: _glowAnimation.value),
+                                      blurRadius: 35,
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -218,18 +260,30 @@ class _BootScreenState extends State<BootScreen>
 
                         const SizedBox(height: 6),
 
-                        Text(
-                          "CONTROL PLATFORM",
-                          style: TextStyle(
-                            color: Colors.white38,
-                            fontSize: subTitleSize,
-                            letterSpacing: 3,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "CloudNex Ops Control System",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: subTitleSize,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Designed, Engineered & Operated by Mohammed Sheik",
+                              style: TextStyle(
+                                color: const Color(0xFF39FF14)
+                                    .withValues(alpha: 0.7),
+                                fontSize: subTitleSize * 0.8,
+                              ),
+                            ),
+                          ],
                         ),
 
                         const SizedBox(height: 20),
 
-                        // ✅ PROGRESS BAR
                         Container(
                           width: barWidth,
                           height: 2,
@@ -246,7 +300,6 @@ class _BootScreenState extends State<BootScreen>
 
                         const SizedBox(height: 10),
 
-                        // ✅ FOOTER STATUS
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: const [
@@ -276,4 +329,23 @@ class _BootScreenState extends State<BootScreen>
       ),
     );
   }
+}
+
+// ✅ CRT SCANLINES
+class ScanlinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()..color = Colors.white.withValues(alpha: 0.05);
+
+    for (double y = 0; y < size.height; y += 4) {
+      canvas.drawRect(
+        Rect.fromLTWH(0, y, size.width, 1),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
