@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'dashboard_screen.dart';
 import 'veeam_screen.dart';
 import 'azure_screen.dart';
 import 'entra_screen.dart';
 import 'intune_screen.dart';
 import 'ad_screen.dart';
+
+import '../widgets/app_header.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,28 +28,38 @@ class _HomeScreenState extends State<HomeScreen> {
     ADScreen(),
   ];
 
-  final List<String> _titles = [
+  final List<String> _titles = const [
     "Dashboard",
     "Veeam Backup",
     "Azure",
     "Entra ID",
     "Intune",
-    "Active Directory"
+    "Active Directory",
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_currentIndex]),
-        backgroundColor: Colors.black,
+      backgroundColor: Colors.black,
+
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ✅ GLOBAL HEADER (LOGO + TITLE)
+            AppHeader(title: _titles[_currentIndex]),
+
+            // ✅ ACTIVE SCREEN
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _screens[_currentIndex],
+              ),
+            ),
+          ],
+        ),
       ),
 
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _screens[_currentIndex],
-      ),
-
+      // ✅ BOTTOM NAVIGATION
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
@@ -59,12 +72,18 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.storage), label: "Veeam"),
-          BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Azure"),
-          BottomNavigationBarItem(icon: Icon(Icons.security), label: "Entra"),
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Intune"),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: "AD"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard), label: "Home"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.storage), label: "Veeam"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.cloud), label: "Azure"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.security), label: "Entra"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.devices), label: "Intune"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.group), label: "AD"),
         ],
       ),
     );

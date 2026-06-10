@@ -1,25 +1,33 @@
 name: cloudnex_ops_dashboard
-description: "CloudNex Enterprise DevOps and Serverless RAG Monitor Client"
+description: CloudNex Enterprise DevOps and Serverless RAG Monitor Client
+
 publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+
   cupertino_icons: ^1.0.6
-  
-  # Enterprise Network & Security Stack
-  http: ^1.2.0                  # Executes REST API requests to GitHub and Cloudflare
-  flutter_secure_storage: ^9.0.0 # Encrypts sensitive API keys on the device
-  provider: ^6.1.1               # Handles clean asynchronous state management
+
+  # ✅ Enterprise Network & Security
+  http: ^1.2.0
+  flutter_secure_storage: ^9.0.0
+  provider: ^6.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
   flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
+
+  # ✅ ASSETS (ADD YOUR LOGO HERE)
+  assets:
+    - assets/images/logo.jpg
