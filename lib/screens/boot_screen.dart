@@ -126,13 +126,13 @@ class _BootScreenState extends State<BootScreen>
               children: [
                 // ✅ MATRIX (SYNCED + STRONG)
                 Opacity(
-                  opacity: 0.25,
+                  opacity: 0.45,
                   child: MatrixRain(progress: progress),
                 ),
 
                 // ✅ LIGHT OVERLAY (keeps matrix visible)
                 Container(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: Colors.black.withValues(alpha: 0.35),
                 ),
 
                 // ✅ CENTER TERMINAL STYLE UI
