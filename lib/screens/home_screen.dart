@@ -28,14 +28,14 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _glowController;
   late Animation<double> _glowAnimation;
 
-  final List<Widget> _screens = const [
-    DashboardScreen(),
-    VeeamScreen(),
-    AzureScreen(),
-    EntraScreen(),
-    IntuneScreen(),
-    ADScreen(),
-  ];
+final List<Widget> _screens = [
+  const DashboardScreen(),
+  const DashboardScreen(),
+  const DashboardScreen(),
+  const DashboardScreen(),
+  const DashboardScreen(),
+  const DashboardScreen(),
+];
 
   final List<String> _titles = const [
     "Dashboard",
