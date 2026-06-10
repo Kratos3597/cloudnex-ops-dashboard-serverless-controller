@@ -111,6 +111,12 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
 
+Positioned.fill(
+  child: Container(
+    color: Colors.black.withValues(alpha: 0.65),
+  ),
+),
+
           // 📱 MAIN UI
           isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
         ],
