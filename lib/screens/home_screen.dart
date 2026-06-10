@@ -16,11 +16,13 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-// ✅ ONLY ONE STATE CLASS (FIXED)
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
 
   int _currentIndex = 0;
+
+  // 🔥 HACK MODE INTENSITY (0 = normal, 1 = full hack)
+  double _hackMode = 0.0;
 
   late AnimationController _glowController;
   late Animation<double> _glowAnimation;
@@ -71,39 +73,54 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
+  void _setHackMode(bool active) {
+    setState(() {
+      _hackMode = active ? 1.0 : 0.0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 700;
 
-    return Stack(
-      children: [
-        // ✅ MATRIX BACKGROUND
-        Opacity(
-          opacity: 0.12,
-          child: MatrixRain(
-            progress: 0.5,
-            depth: 0.3,
-          ),
-        ),
+    return GestureDetector(
+      onTapDown: (_) => _setHackMode(true),
+      onTapUp: (_) => _setHackMode(false),
+      onTapCancel: () => _setHackMode(false),
 
-        // ✅ SCANLINES
-        IgnorePointer(
-          child: Opacity(
-            opacity: 0.05,
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _ScanlinePainter(),
+      child: Stack(
+        children: [
+          // 🌌 MATRIX BACKGROUND (reacts to hack mode)
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.12 + (_hackMode * 0.2),
+              child: MatrixRain(
+                progress: 0.5 + (_hackMode * 2.5),
+                depth: 0.3 + (_hackMode * 0.5),
+              ),
             ),
           ),
-        ),
 
-        // ✅ MAIN UI
-        isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
-      ],
+          // 💚 HACK MODE GREEN OVERLAY
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                color: Colors.green.withValues(alpha: _hackMode * 0.06),
+              ),
+            ),
+          ),
+
+          // 📱 MAIN UI
+          isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
+        ],
+      ),
     );
   }
 
-  // ✅ MOBILE UI
+  // =========================
+  // 📱 MOBILE
+  // =========================
   Widget _buildMobileLayout() {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -156,13 +173,15 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ✅ DESKTOP UI
+  // =========================
+  // 💻 DESKTOP
+  // =========================
   Widget _buildDesktopLayout() {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Row(
         children: [
-          // ✅ SIDEBAR
+          // 🧭 SIDEBAR
           Container(
             width: 220,
             color: CyberpunkTheme.bgCard,
@@ -170,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 const SizedBox(height: 20),
 
-                // ✅ GLOW LOGO
+                // 💡 GLOW LOGO (reacts to hack mode)
                 AnimatedBuilder(
                   animation: _glowAnimation,
                   builder: (_, __) {
@@ -182,9 +201,10 @@ class _HomeScreenState extends State<HomeScreen>
                         color: CyberpunkTheme.textLight,
                         shadows: [
                           Shadow(
-                            color: CyberpunkTheme.neonBlue
-                                .withValues(alpha: _glowAnimation.value),
-                            blurRadius: 20,
+                            color: CyberpunkTheme.neonBlue.withValues(
+                              alpha: _glowAnimation.value + _hackMode,
+                            ),
+                            blurRadius: 20 + (_hackMode * 30),
                           ),
                         ],
                       ),
@@ -194,7 +214,6 @@ class _HomeScreenState extends State<HomeScreen>
 
                 const SizedBox(height: 30),
 
-                // ✅ NAV ITEMS
                 ...List.generate(_navItems.length, (index) {
                   final item = _navItems[index];
 
@@ -209,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
 
-          // ✅ CONTENT
+          // 📄 CONTENT
           Expanded(
             child: Column(
               children: [
@@ -229,7 +248,9 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ✅ NAV ITEM
+  // =========================
+  // 📌 NAV ITEM
+  // =========================
   Widget _navItem({
     required IconData icon,
     required String label,
@@ -247,8 +268,8 @@ class _HomeScreenState extends State<HomeScreen>
             onTap: onTap,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 14),
               transform:
                   Matrix4.translationValues(0, isHovering ? -3 : 0, 0),
               color: isActive
@@ -256,23 +277,11 @@ class _HomeScreenState extends State<HomeScreen>
                   : Colors.transparent,
               child: Row(
                 children: [
-                  AnimatedRotation(
-                    turns: isActive ? 1 : 0,
-                    duration: const Duration(milliseconds: 400),
-                    child: Icon(
-                      icon,
-                      color: (isActive || isHovering)
-                          ? CyberpunkTheme.neonBlue
-                          : CyberpunkTheme.textMuted,
-                      shadows: (isActive || isHovering)
-                          ? [
-                              const Shadow(
-                                color: CyberpunkTheme.neonBlue,
-                                blurRadius: 12,
-                              )
-                            ]
-                          : [],
-                    ),
+                  Icon(
+                    icon,
+                    color: (isActive || isHovering)
+                        ? CyberpunkTheme.neonBlue
+                        : CyberpunkTheme.textMuted,
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -292,20 +301,4 @@ class _HomeScreenState extends State<HomeScreen>
       },
     );
   }
-}
-
-// ✅ SCANLINE PAINTER
-class _ScanlinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()..color = Colors.white.withValues(alpha: 0.05);
-
-    for (double y = 0; y < size.height; y += 4) {
-      canvas.drawRect(Rect.fromLTWH(0, y, size.width, 1), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
