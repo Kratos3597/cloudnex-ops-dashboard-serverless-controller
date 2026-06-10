@@ -29,9 +29,6 @@ class _MatrixRainState extends State<MatrixRain> {
 
   late double fontSize;
 
-  // 🔥 HACK MODE STATE
-  double hackIntensity = 0.0; // 0 = normal, 1 = full hack mode
-
   @override
   void initState() {
     super.initState();
@@ -63,12 +60,6 @@ class _MatrixRainState extends State<MatrixRain> {
     super.dispose();
   }
 
-  void _setHackMode(bool active) {
-    setState(() {
-      hackIntensity = active ? 1.0 : 0.0;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -77,35 +68,15 @@ class _MatrixRainState extends State<MatrixRain> {
       initMatrix(size);
     }
 
-    return GestureDetector(
-      onTapDown: (_) => _setHackMode(true),
-      onTapUp: (_) => _setHackMode(false),
-      onTapCancel: () => _setHackMode(false),
-
-      child: Stack(
-        children: [
-          // 🌌 MATRIX RAIN
-          CustomPaint(
-            size: Size.infinite,
-            painter: MatrixPainter(
-              drops: drops,
-              speeds: speeds,
-              chars: chars,
-              fontSize: fontSize,
-              progress: widget.progress * (1.0 + hackIntensity * 2),
-              depth: widget.depth,
-              hackIntensity: hackIntensity,
-            ),
-          ),
-
-          // 🔥 HACK MODE OVERLAY GLOW
-          IgnorePointer(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              color: Colors.green.withValues(alpha: hackIntensity * 0.08),
-            ),
-          ),
-        ],
+    return CustomPaint(
+      size: Size.infinite,
+      painter: MatrixPainter(
+        drops: drops,
+        speeds: speeds,
+        chars: chars,
+        fontSize: fontSize,
+        progress: widget.progress,
+        depth: widget.depth,
       ),
     );
   }
@@ -118,7 +89,6 @@ class MatrixPainter extends CustomPainter {
   final double fontSize;
   final double progress;
   final double depth;
-  final double hackIntensity;
 
   MatrixPainter({
     required this.drops,
@@ -127,22 +97,18 @@ class MatrixPainter extends CustomPainter {
     required this.fontSize,
     required this.progress,
     required this.depth,
-    required this.hackIntensity,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 🌑 fade trail (stronger in hack mode)
-    final fadeAlpha = depth < 0.5 ? 0.03 : 0.05;
-    final paint = Paint()
-      ..color = Colors.black.withValues(
-        alpha: fadeAlpha + (hackIntensity * 0.08),
-      );
+    // 💀 FIXED FADE (NO STACKING COLOR SHIFT)
+    final fadePaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.08);
 
-    canvas.drawRect(Offset.zero & size, paint);
+    canvas.drawRect(Offset.zero & size, fadePaint);
 
     for (int i = 0; i < drops.length; i++) {
-      double speedBoost = progress * 1.2;
+      double speedBoost = progress * 1.1;
 
       drops[i] += speeds[i] + speedBoost;
 
@@ -151,7 +117,7 @@ class MatrixPainter extends CustomPainter {
         drops[i] = 0;
       }
 
-      int trailLength = (depth > 0.5 ? 10 : 6) + (hackIntensity * 6).toInt();
+      int trailLength = depth > 0.5 ? 10 : 6;
 
       for (int trail = 0; trail < trailLength; trail++) {
         int y = (drops[i] - trail).toInt();
@@ -161,18 +127,9 @@ class MatrixPainter extends CustomPainter {
 
         double opacity = (1 - (trail / trailLength)).clamp(0.1, 1.0);
 
-        Color color;
-
-        if (trail == 0) {
-          color = Color.lerp(
-            const Color(0xFF39FF14),
-            Colors.white,
-            hackIntensity,
-          )!;
-        } else {
-          color = const Color(0xFF39FF14)
-              .withValues(alpha: opacity + hackIntensity * 0.3);
-        }
+        // ⚡ FIXED COLOR (NO LERP = NO CYAN SHIFT)
+        final color = const Color(0xFF39FF14)
+            .withValues(alpha: opacity);
 
         final textPainter = TextPainter(
           text: TextSpan(

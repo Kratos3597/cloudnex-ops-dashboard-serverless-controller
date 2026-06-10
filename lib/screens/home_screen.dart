@@ -3,6 +3,8 @@ import '../theme/cyberpunk_theme.dart';
 import '../widgets/matrix_rain.dart';
 import '../widgets/app_header.dart';
 import '../widgets/cyber_fx_layer.dart';
+import '../widgets/glitch_transition.dart';
+
 import 'dashboard_screen.dart';
 import 'veeam_screen.dart';
 import 'azure_screen.dart';
@@ -100,19 +102,19 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
 
-          // 🌑 DARK DEPTH LAYER (IMPORTANT FIX)
+          // 🌑 DARK LAYER
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.65),
             ),
           ),
 
-          // ⚡ SCANLINES + NOISE
+          // ⚡ FX LAYER
           Positioned.fill(
             child: CyberFxLayer(intensity: 1.0 + _hackMode),
           ),
 
-          // 💚 HACK FLASH OVERLAY
+          // 💚 HACK FLASH
           Positioned.fill(
             child: IgnorePointer(
               child: AnimatedContainer(
@@ -122,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
 
-          // 📱 UI
+          // 📱 MAIN UI
           isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
         ],
       ),
@@ -136,9 +138,15 @@ class _HomeScreenState extends State<HomeScreen>
         AppHeader(title: _titles[_currentIndex]),
 
         Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: _screens[_currentIndex],
+          child: GlitchTransition(
+            active: _hackMode > 0,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: KeyedSubtree(
+                key: ValueKey(_currentIndex),
+                child: _screens[_currentIndex],
+              ),
+            ),
           ),
         ),
       ],
@@ -213,9 +221,15 @@ class _HomeScreenState extends State<HomeScreen>
               AppHeader(title: _titles[_currentIndex]),
 
               Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _screens[_currentIndex],
+                child: GlitchTransition(
+                  active: _hackMode > 0,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: KeyedSubtree(
+                      key: ValueKey(_currentIndex),
+                      child: _screens[_currentIndex],
+                    ),
+                  ),
                 ),
               ),
             ],
