@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/cyberpunk_theme.dart';
 import '../widgets/matrix_rain.dart';
 import '../widgets/app_header.dart';
+import '../widgets/cyber_fx_layer.dart';
 import 'dashboard_screen.dart';
 import 'veeam_screen.dart';
 import 'azure_screen.dart';
@@ -20,8 +21,6 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
 
   int _currentIndex = 0;
-
-  // 🔥 HACK MODE INTENSITY (0 = normal, 1 = full hack)
   double _hackMode = 0.0;
 
   late AnimationController _glowController;
@@ -46,12 +45,12 @@ class _HomeScreenState extends State<HomeScreen>
   ];
 
   final List<Map<String, dynamic>> _navItems = const [
-    {"label": "/dashboard", "icon": Icons.dashboard},
-    {"label": "/veeam", "icon": Icons.storage},
-    {"label": "/azure", "icon": Icons.cloud},
-    {"label": "/entra", "icon": Icons.verified_user},
-    {"label": "/intune", "icon": Icons.devices},
-    {"label": "/directory", "icon": Icons.account_tree},
+    {"label": "Dashboard", "icon": Icons.dashboard},
+    {"label": "Veeam", "icon": Icons.storage},
+    {"label": "Azure", "icon": Icons.cloud},
+    {"label": "Entra", "icon": Icons.verified_user},
+    {"label": "Intune", "icon": Icons.devices},
+    {"label": "AD", "icon": Icons.account_tree},
   ];
 
   @override
@@ -73,9 +72,14 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-  void _setHackMode(bool active) {
-    setState(() {
-      _hackMode = active ? 1.0 : 0.0;
+  void _triggerHackMode(int index) {
+    setState(() => _hackMode = 1.0);
+
+    Future.delayed(const Duration(milliseconds: 120), () {
+      setState(() {
+        _currentIndex = index;
+        _hackMode = 0.0;
+      });
     });
   }
 
@@ -83,228 +87,141 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 700;
 
-    return GestureDetector(
-      onTapDown: (_) => _setHackMode(true),
-      onTapUp: (_) => _setHackMode(false),
-      onTapCancel: () => _setHackMode(false),
-
-      child: Stack(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
         children: [
-          // 🌌 MATRIX BACKGROUND (reacts to hack mode)
+
+          // 🌌 MATRIX BASE LAYER
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.12 + (_hackMode * 0.2),
-              child: MatrixRain(
-                progress: 0.5 + (_hackMode * 2.5),
-                depth: 0.3 + (_hackMode * 0.5),
-              ),
+            child: MatrixRain(
+              progress: 0.6 + (_hackMode * 1.5),
+              depth: 0.4,
             ),
           ),
 
-          // 💚 HACK MODE GREEN OVERLAY
+          // 🌑 DARK DEPTH LAYER (IMPORTANT FIX)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.65),
+            ),
+          ),
+
+          // ⚡ SCANLINES + NOISE
+          Positioned.fill(
+            child: CyberFxLayer(intensity: 1.0 + _hackMode),
+          ),
+
+          // 💚 HACK FLASH OVERLAY
           Positioned.fill(
             child: IgnorePointer(
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                color: Colors.green.withValues(alpha: _hackMode * 0.06),
+                duration: const Duration(milliseconds: 100),
+                color: Colors.green.withOpacity(_hackMode * 0.08),
               ),
             ),
           ),
 
-Positioned.fill(
-  child: Container(
-    color: Colors.black.withValues(alpha: 0.65),
-  ),
-),
-
-          // 📱 MAIN UI
+          // 📱 UI
           isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
         ],
       ),
     );
   }
 
-  // =========================
-  // 📱 MOBILE
-  // =========================
+  // ================= MOBILE =================
   Widget _buildMobileLayout() {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppHeader(title: _titles[_currentIndex]),
+    return Column(
+      children: [
+        AppHeader(title: _titles[_currentIndex]),
 
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _screens[_currentIndex],
-              ),
-            ),
-          ],
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _screens[_currentIndex],
+          ),
         ),
-      ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF05070C),
-        selectedItemColor: CyberpunkTheme.neonBlue,
-        unselectedItemColor: CyberpunkTheme.textMuted,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: List.generate(_navItems.length, (index) {
-          final item = _navItems[index];
-          final isActive = index == _currentIndex;
-
-          return BottomNavigationBarItem(
-            icon: AnimatedScale(
-              scale: isActive ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                item["icon"],
-                shadows: isActive
-                    ? [
-                        const Shadow(
-                          color: CyberpunkTheme.neonBlue,
-                          blurRadius: 12,
-                        )
-                      ]
-                    : [],
-              ),
-            ),
-            label: item["label"].replaceAll("/", ""),
-          );
-        }),
-      ),
+      ],
     );
   }
 
-  // =========================
-  // 💻 DESKTOP
-  // =========================
+  // ================= DESKTOP =================
   Widget _buildDesktopLayout() {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Row(
-        children: [
-          // 🧭 SIDEBAR
-          Container(
-            width: 220,
-            color: CyberpunkTheme.bgCard,
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
+    return Row(
+      children: [
 
-                // 💡 GLOW LOGO (reacts to hack mode)
-                AnimatedBuilder(
-                  animation: _glowAnimation,
-                  builder: (_, __) {
-                    return Text(
-                      "_CLOUDNEX",
-                      style: TextStyle(
-                        fontFamily: 'FiraCode',
-                        fontSize: 18,
-                        color: CyberpunkTheme.textLight,
-                        shadows: [
-                          Shadow(
-                            color: CyberpunkTheme.neonBlue.withValues(
-                              alpha: _glowAnimation.value + _hackMode,
-                            ),
-                            blurRadius: 20 + (_hackMode * 30),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+        // 🧭 SIDEBAR
+        Container(
+          width: 220,
+          color: Colors.black.withOpacity(0.4),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-                const SizedBox(height: 30),
-
-                ...List.generate(_navItems.length, (index) {
-                  final item = _navItems[index];
-
-                  return _navItem(
-                    icon: item["icon"],
-                    label: item["label"],
-                    isActive: index == _currentIndex,
-                    onTap: () => setState(() => _currentIndex = index),
+              AnimatedBuilder(
+                animation: _glowAnimation,
+                builder: (_, __) {
+                  return Text(
+                    "_CLOUDNEX",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: CyberpunkTheme.neonBlue.withOpacity(
+                              _glowAnimation.value + _hackMode),
+                          blurRadius: 25,
+                        ),
+                      ],
+                    ),
                   );
-                }),
-              ],
-            ),
-          ),
+                },
+              ),
 
-          // 📄 CONTENT
-          Expanded(
-            child: Column(
-              children: [
-                AppHeader(title: _titles[_currentIndex]),
+              const SizedBox(height: 30),
 
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _screens[_currentIndex],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+              ...List.generate(_navItems.length, (index) {
+                final item = _navItems[index];
+                final isActive = index == _currentIndex;
 
-  // =========================
-  // 📌 NAV ITEM
-  // =========================
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    bool isHovering = false;
-
-    return StatefulBuilder(
-      builder: (context, setHover) {
-        return MouseRegion(
-          onEnter: (_) => setHover(() => isHovering = true),
-          onExit: (_) => setHover(() => isHovering = false),
-          child: GestureDetector(
-            onTap: onTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 14),
-              transform:
-                  Matrix4.translationValues(0, isHovering ? -3 : 0, 0),
-              color: isActive
-                  ? CyberpunkTheme.neonBlue.withValues(alpha: 0.1)
-                  : Colors.transparent,
-              child: Row(
-                children: [
-                  Icon(
-                    icon,
-                    color: (isActive || isHovering)
+                return ListTile(
+                  leading: Icon(
+                    item["icon"],
+                    color: isActive
                         ? CyberpunkTheme.neonBlue
                         : CyberpunkTheme.textMuted,
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    label,
+                  title: Text(
+                    item["label"],
                     style: TextStyle(
-                      fontFamily: 'FiraCode',
-                      color: (isActive || isHovering)
+                      color: isActive
                           ? CyberpunkTheme.neonBlue
                           : CyberpunkTheme.textMuted,
                     ),
                   ),
-                ],
-              ),
-            ),
+                  onTap: () => _triggerHackMode(index),
+                );
+              }),
+            ],
           ),
-        );
-      },
+        ),
+
+        // 📄 CONTENT
+        Expanded(
+          child: Column(
+            children: [
+              AppHeader(title: _titles[_currentIndex]),
+
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _screens[_currentIndex],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
