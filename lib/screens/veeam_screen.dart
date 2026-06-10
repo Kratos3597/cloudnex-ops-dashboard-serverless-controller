@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/cyberpunk_theme.dart';
 
 class VeeamScreen extends StatefulWidget {
   const VeeamScreen({super.key});
@@ -9,28 +10,15 @@ class VeeamScreen extends StatefulWidget {
 
 class _VeeamScreenState extends State<VeeamScreen> {
   List<Map<String, dynamic>> jobs = [
-    {
-      "name": "Daily Backup",
-      "status": "OK",
-      "progress": 100,
-    },
-    {
-      "name": "Weekly Backup",
-      "status": "RUNNING",
-      "progress": 60,
-    },
-    {
-      "name": "SQL Server Backup",
-      "status": "FAILED",
-      "progress": 30,
-    },
+    {"name": "Daily Backup", "status": "OK", "progress": 100},
+    {"name": "Weekly Backup", "status": "RUNNING", "progress": 60},
+    {"name": "SQL Server Backup", "status": "FAILED", "progress": 30},
   ];
 
   @override
   void initState() {
     super.initState();
 
-    // 🔥 Simulate live job updates
     Stream.periodic(const Duration(seconds: 2)).listen((_) {
       setState(() {
         for (var job in jobs) {
@@ -72,7 +60,7 @@ class _VeeamScreenState extends State<VeeamScreen> {
         border: Border.all(color: color),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.6),
+            color: color.withValues(alpha: 0.6), // ✅ fixed
             blurRadius: 12,
           )
         ],
@@ -80,7 +68,7 @@ class _VeeamScreenState extends State<VeeamScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Job name + status
+          // 🔥 Job header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -101,7 +89,7 @@ class _VeeamScreenState extends State<VeeamScreen> {
 
           const SizedBox(height: 10),
 
-          // Progress bar
+          // 🔥 Progress
           LinearProgressIndicator(
             value: job["progress"] / 100,
             color: color,
@@ -117,7 +105,7 @@ class _VeeamScreenState extends State<VeeamScreen> {
 
           const SizedBox(height: 10),
 
-          // Buttons
+          // 🔥 Buttons
           Row(
             children: [
               ElevatedButton(
@@ -151,7 +139,7 @@ class _VeeamScreenState extends State<VeeamScreen> {
                 child: const Text("Stop"),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -159,8 +147,21 @@ class _VeeamScreenState extends State<VeeamScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: jobs.map((job) => buildJobCard(job)).toList(),
+    return Scaffold(
+      backgroundColor: Colors.transparent, // ✅ important
+      body: Stack(
+        children: [
+          CyberpunkTheme.backgroundLayer(), // ✅ global background
+
+          SafeArea(
+            child: ListView(
+              children: [
+                ...jobs.map((job) => buildJobCard(job)), // ✅ fixed
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

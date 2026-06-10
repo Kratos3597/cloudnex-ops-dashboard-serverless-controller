@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/cyberpunk_theme.dart';
 
 class AzureScreen extends StatefulWidget {
   const AzureScreen({super.key});
@@ -9,26 +10,10 @@ class AzureScreen extends StatefulWidget {
 
 class _AzureScreenState extends State<AzureScreen> {
   List<Map<String, dynamic>> services = [
-    {
-      "name": "Virtual Machines",
-      "status": "Running",
-      "count": 8,
-    },
-    {
-      "name": "Storage Accounts",
-      "status": "Healthy",
-      "count": 5,
-    },
-    {
-      "name": "SQL Databases",
-      "status": "Warning",
-      "count": 3,
-    },
-    {
-      "name": "App Services",
-      "status": "Running",
-      "count": 4,
-    },
+    {"name": "Virtual Machines", "status": "Running", "count": 8},
+    {"name": "Storage Accounts", "status": "Healthy", "count": 5},
+    {"name": "SQL Databases", "status": "Warning", "count": 3},
+    {"name": "App Services", "status": "Running", "count": 4},
   ];
 
   String subscription = "Production Subscription";
@@ -37,21 +22,22 @@ class _AzureScreenState extends State<AzureScreen> {
   void initState() {
     super.initState();
 
-    // 🔥 simulate live Azure updates
     Stream.periodic(const Duration(seconds: 3)).listen((_) {
+      if (!mounted) return;
+
       setState(() {
         for (var service in services) {
-          service["count"] += 1;
+          service["count"]++;
 
           if (service["count"] > 10) {
             service["count"] = 3;
           }
         }
 
-        // Random status simulation
-        services[2]["status"] = services[2]["status"] == "Warning"
-            ? "Running"
-            : "Warning";
+        services[2]["status"] =
+            services[2]["status"] == "Warning"
+                ? "Running"
+                : "Warning";
       });
     });
   }
@@ -82,7 +68,7 @@ class _AzureScreenState extends State<AzureScreen> {
         border: Border.all(color: color),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.6),
+            color: color.withValues(alpha: 0.6),
             blurRadius: 12,
           )
         ],
@@ -98,8 +84,8 @@ class _AzureScreenState extends State<AzureScreen> {
                 service["name"],
                 style: TextStyle(
                   color: color,
-                  fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
               Text(
@@ -111,7 +97,7 @@ class _AzureScreenState extends State<AzureScreen> {
                 style: TextStyle(color: color),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -127,20 +113,24 @@ class _AzureScreenState extends State<AzureScreen> {
         border: Border.all(color: Colors.cyanAccent),
         boxShadow: [
           BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.6),
+            color: Colors.cyanAccent.withValues(alpha: 0.6),
             blurRadius: 12,
           )
         ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.account_tree, color: Colors.cyanAccent, size: 36),
+          const Icon(Icons.account_tree,
+              color: Colors.cyanAccent,
+              size: 36),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("SUBSCRIPTION",
-                  style: TextStyle(color: Colors.white70)),
+              const Text(
+                "SUBSCRIPTION",
+                style: TextStyle(color: Colors.white70),
+              ),
               Text(
                 subscription,
                 style: const TextStyle(
@@ -158,14 +148,25 @@ class _AzureScreenState extends State<AzureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        // 🔥 Subscription panel
-        subscriptionHeader(),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          CyberpunkTheme.backgroundLayer(),
 
-        // 🔥 Services list
-        ...services.map((service) => buildServiceCard(service)).toList(),
-      ],
+          SafeArea(
+            child: ListView(
+              children: [
+                subscriptionHeader(),
+
+                ...services.map(
+                  (service) => buildServiceCard(service),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

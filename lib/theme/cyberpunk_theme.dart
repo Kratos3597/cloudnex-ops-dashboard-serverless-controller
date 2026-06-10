@@ -4,6 +4,7 @@ class CyberpunkTheme {
   static ThemeData get theme {
     return ThemeData(
       brightness: Brightness.dark,
+
       scaffoldBackgroundColor: const Color(0xFF05050A),
 
       primaryColor: Colors.cyanAccent,
@@ -32,7 +33,22 @@ class CyberpunkTheme {
     );
   }
 
-  // ✅ reusable neon box
+  // ✅ GLOBAL CYBERPUNK BACKGROUND (NEW 🔥)
+  static Widget backgroundLayer() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          radius: 1.2,
+          colors: [
+            Color(0x1100FFFF), // neon glow
+            Color(0xFF05050A), // dark outer
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ✅ NEON CARD STYLE
   static BoxDecoration neonBox(Color color) {
     return BoxDecoration(
       color: Colors.black,
@@ -40,8 +56,9 @@ class CyberpunkTheme {
       border: Border.all(color: color),
       boxShadow: [
         BoxShadow(
-          color: color.withOpacity(0.6),
+          color: color.withValues(alpha: 0.6), // ✅ updated
           blurRadius: 15,
+          spreadRadius: 1,
         ),
       ],
     );

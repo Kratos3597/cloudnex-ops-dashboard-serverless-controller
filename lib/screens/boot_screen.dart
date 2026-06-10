@@ -69,48 +69,81 @@ class _BootScreenState extends State<BootScreen> {
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            const MatrixRain(),
+            const MatrixRain(), // ✅ matrix background
 
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
 
-                  const Text(
-                    "CLOUDNEX CONTROL",
-                    style: TextStyle(
-                      color: Colors.cyanAccent,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                    // 🔥 TITLE
+                    const Text(
+                      "CLOUDNEX CONTROL",
+                      style: TextStyle(
+                        color: Colors.cyanAccent,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  ...logs.map((line) {
-                    return Row(
-                      children: [
-                        const Text("> ",
-                            style: TextStyle(color: Colors.greenAccent)),
-                        Expanded(
-                          child: Text(
-                            line,
-                            style: const TextStyle(
+                    // 🔥 CENTERED TERMINAL
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...logs.map((line) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    "> ",
+                                    style: TextStyle(
+                                      color: Colors.greenAccent,
+                                      fontFamily: 'FiraCode',
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      line,
+                                      style: const TextStyle(
+                                        color: Colors.greenAccent,
+                                        fontFamily: 'FiraCode',
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+
+                          const SizedBox(height: 10),
+
+                          // 🔥 CURSOR
+                          const Text(
+                            "_",
+                            style: TextStyle(
                               color: Colors.greenAccent,
-                              fontFamily: 'Courier',
+                              fontFamily: 'FiraCode',
+                              fontSize: 18,
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      ),
+                    ),
 
-                  const SizedBox(height: 10),
-                  const Text("_",
-                      style: TextStyle(color: Colors.greenAccent)),
-                ],
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/neon_card.dart';
+import '../theme/cyberpunk_theme.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -23,7 +24,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
 
-    // 🔥 Live data simulation
     Stream.periodic(const Duration(seconds: 2)).listen((_) {
       setState(() {
         devices++;
@@ -72,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         border: Border.all(color: Colors.redAccent),
         boxShadow: [
           BoxShadow(
-            color: Colors.redAccent.withOpacity(0.6),
+            color: Colors.redAccent.withValues(alpha: 0.6),
             blurRadius: 15,
           )
         ],
@@ -103,49 +103,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
         children: [
-          // 🔥 GRID LAYOUT WITH NeonCard
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                NeonCard(
-                  title: "Backup",
-                  value: backupStatus,
-                  icon: Icons.storage,
-                  color: getStatusColor(backupStatus),
-                ),
-                const NeonCard(
-                  title: "Azure",
-                  value: "ONLINE",
-                  icon: Icons.cloud,
-                  color: Colors.cyanAccent,
-                ),
-                NeonCard(
-                  title: "Devices",
-                  value: "$devices",
-                  icon: Icons.devices,
-                  color: Colors.purpleAccent,
-                ),
-                NeonCard(
-                  title: "Users",
-                  value: "$users",
-                  icon: Icons.group,
-                  color: Colors.orangeAccent,
-                ),
-              ],
+          CyberpunkTheme.backgroundLayer(),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        NeonCard(
+                          title: "Backup",
+                          value: backupStatus,
+                          icon: Icons.storage,
+                          color: getStatusColor(backupStatus),
+                        ),
+                        const NeonCard(
+                          title: "Azure",
+                          value: "ONLINE",
+                          icon: Icons.cloud,
+                          color: Colors.cyanAccent,
+                        ),
+                        NeonCard(
+                          title: "Devices",
+                          value: "$devices",
+                          icon: Icons.devices,
+                          color: Colors.purpleAccent,
+                        ),
+                        NeonCard(
+                          title: "Users",
+                          value: "$users",
+                          icon: Icons.group,
+                          color: Colors.orangeAccent,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  alertPanel(),
+                ],
+              ),
             ),
           ),
-
-          // 🔥 ALERT PANEL
-          alertPanel(),
         ],
       ),
     );
