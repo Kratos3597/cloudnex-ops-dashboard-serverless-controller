@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import '../widgets/matrix_rain.dart';
 
 class BootScreen extends StatefulWidget {
   const BootScreen({super.key});
@@ -9,59 +10,110 @@ class BootScreen extends StatefulWidget {
 }
 
 class _BootScreenState extends State<BootScreen> {
+  List<String> logs = [];
+  double opacity = 1.0;
+
   final List<String> steps = [
-    "INITIALIZING CLOUDNEX CONTROL...",
+    "INITIALIZING CORE...",
+    "LOADING POWER MODULES...",
     "CONNECTING TO AZURE...",
     "SYNCING DIRECTORY...",
-    "LOADING SECURITY MODULES...",
+    "STABILIZING NETWORK...",
     "ACCESS GRANTED"
   ];
-
-  List<String> logs = [];
 
   @override
   void initState() {
     super.initState();
-    runBootSequence();
+    startBoot();
   }
 
-  Future<void> runBootSequence() async {
+  Future<void> startBoot() async {
     for (var step in steps) {
-      await Future.delayed(const Duration(milliseconds: 900));
+      await Future.delayed(const Duration(milliseconds: 700));
+
       if (!mounted) return;
+
       setState(() {
         logs.add(step);
       });
     }
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    setState(() {
+      opacity = 0;
+    });
+
     await Future.delayed(const Duration(milliseconds: 800));
+
     if (!mounted) return;
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const HomeScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: logs.map((line) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Text(
-                line,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontSize: 16,
-                  fontFamily: 'Courier',
-                ),
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 800),
+      opacity: opacity,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            const MatrixRain(),
+
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 40),
+
+                  const Text(
+                    "CLOUDNEX CONTROL",
+                    style: TextStyle(
+                      color: Colors.cyanAccent,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  ...logs.map((line) {
+                    return Row(
+                      children: [
+                        const Text("> ",
+                            style: TextStyle(color: Colors.greenAccent)),
+                        Expanded(
+                          child: Text(
+                            line,
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontFamily: 'Courier',
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+
+                  const SizedBox(height: 10),
+                  const Text("_",
+                      style: TextStyle(color: Colors.greenAccent)),
+                ],
               ),
-            );
-          }).toList(),
+            ),
+          ],
         ),
       ),
     );
