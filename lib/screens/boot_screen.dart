@@ -126,7 +126,7 @@ class _BootScreenState extends State<BootScreen>
               children: [
                 // ✅ MATRIX (SYNCED + STRONG)
                 Opacity(
-                  opacity: 0.45,
+                  opacity: 0.5,
                   child: MatrixRain(progress: progress),
                 ),
 
