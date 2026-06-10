@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 class CyberFxLayer extends StatefulWidget {
@@ -16,7 +15,6 @@ class CyberFxLayer extends StatefulWidget {
 class _CyberFxLayerState extends State<CyberFxLayer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  final Random _random = Random();
 
   @override
   void initState() {
@@ -34,7 +32,7 @@ class _CyberFxLayerState extends State<CyberFxLayer>
     super.dispose();
   }
 
-  double _noise() => _random.nextDouble();
+  double _noise = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +44,7 @@ class _CyberFxLayerState extends State<CyberFxLayer>
             size: Size.infinite,
             painter: _CyberFxPainter(
               intensity: widget.intensity,
-              noise: _noise(),
+              noise: _noise,
             ),
           );
         },
@@ -88,5 +86,8 @@ class _CyberFxPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  return oldDelegate is _CyberFxPainter &&
+      oldDelegate.intensity != intensity;
+}
 }

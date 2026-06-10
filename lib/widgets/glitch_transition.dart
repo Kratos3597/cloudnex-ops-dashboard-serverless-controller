@@ -18,16 +18,15 @@ class _GlitchTransitionState extends State<GlitchTransition>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  @override
-  void initState() {
-    super.initState();
+@override
+void initState() {
+  super.initState();
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    );
-  }
-
+  _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 250),
+  );
+}
   @override
   void didUpdateWidget(covariant GlitchTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -36,7 +35,11 @@ class _GlitchTransitionState extends State<GlitchTransition>
       _controller.forward(from: 0);
     }
   }
-
+@override
+void dispose() {
+  _controller.dispose();
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
