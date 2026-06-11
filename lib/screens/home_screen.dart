@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../widgets/matrix_rain.dart';
 import '../widgets/app_header.dart';
 import '../widgets/cyber_fx_layer.dart';
+import '../theme/cyberpunk_theme.dart';
+import '../widgets/terminal_shell.dart';
 
 import 'dashboard_screen.dart';
 import 'veeam_screen.dart';
@@ -18,17 +20,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   int _currentIndex = 0;
-  double _hackMode = 0.0;
+  final double _hackMode = 0.0;
 
-  final List<Widget> _screens = [
-    const DashboardScreen(),
-    const VeeamScreen(),
-    const AzureScreen(),
-    const EntraScreen(),
-    const IntuneScreen(),
-    const ADScreen(),
+  final List<Widget> _screens = const [
+    DashboardScreen(),
+    VeeamScreen(),
+    AzureScreen(),
+    EntraScreen(),
+    IntuneScreen(),
+    ADScreen(),
   ];
 
   final List<String> _titles = const [
@@ -43,22 +44,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onTabChanged(int index) {
     setState(() {
       _currentIndex = index;
-      _hackMode = 0.0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-
+      backgroundColor: CyberpunkTheme.bgDark,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabChanged,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.cyanAccent,
-        unselectedItemColor: Colors.grey,
+        backgroundColor: CyberpunkTheme.bgCard,
+        selectedItemColor: CyberpunkTheme.neonBlue,
+        unselectedItemColor: CyberpunkTheme.textMuted,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Dash"),
           BottomNavigationBarItem(icon: Icon(Icons.storage), label: "Veeam"),
@@ -68,11 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.account_tree), label: "AD"),
         ],
       ),
-
       body: Stack(
         children: [
+          // 1. Theme Background
+          CyberpunkTheme.backgroundLayer(),
 
-          // 🌌 MATRIX BACKGROUND
+          // 2. 🌌 MATRIX BACKGROUND
           Positioned.fill(
             child: MatrixRain(
               progress: 0.6 + (_hackMode * 1.5),
@@ -80,27 +80,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // 🌑 DARK OVERLAY
+          // 3. 🌑 DARK OVERLAY
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.65),
+              color: Colors.black.withValues(alpha: 0.65),
             ),
           ),
 
-          // ⚡ FX LAYER
+          // 4. ⚡ FX LAYER
           Positioned.fill(
             child: CyberFxLayer(intensity: 1.0 + _hackMode),
           ),
 
-          // 📱 MAIN CONTENT
-          Column(
-            children: [
-              AppHeader(title: _titles[_currentIndex]),
-
-              Expanded(
-                child: _screens[_currentIndex],
-              ),
-            ],
+          // 5. 📱 MAIN CONTENT SHELL
+          SafeArea(
+            child: Column(
+              children: [
+                AppHeader(title: _titles[_currentIndex]),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TerminalShell(
+                      child: _screens[_currentIndex],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

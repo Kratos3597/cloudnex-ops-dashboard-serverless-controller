@@ -1,4 +1,36 @@
 import 'package:flutter/material.dart';
+import '../theme/cyberpunk_theme.dart';
+import '../widgets/terminal_shell.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // The body is where the Stack goes
+      body: Stack(
+        children: [
+          // 1. Background Layer (drawn first)
+          CyberpunkTheme.backgroundLayer(), 
+          
+          // 2. Terminal Shell (drawn on top)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TerminalShell(
+                child: Text(
+                  "SYSTEM INITIALIZED\nWelcome, Mohammed Sheik.", 
+                  style: TextStyle(color: CyberpunkTheme.textLight)
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class ADScreen extends StatefulWidget {
   const ADScreen({super.key});
