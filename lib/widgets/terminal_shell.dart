@@ -32,10 +32,12 @@ class TerminalShell extends StatelessWidget {
               ],
             ),
           ),
-          // Content Area
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: child,
+          // Content Area - Expanded prevents overflow
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: child,
+            ),
           ),
         ],
       ),
