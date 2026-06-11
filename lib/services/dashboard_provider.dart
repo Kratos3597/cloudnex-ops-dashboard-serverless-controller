@@ -1,90 +1,101 @@
 import 'package:flutter/material.dart';
+import '../services/fake_data_service.dart';
+import '../services/api_service.dart';
+import '../services/storage_service.dart';
 
 class DashboardProvider with ChangeNotifier {
+  // Services
+  final FakeDataService _fakeService = FakeDataService();
+  final ApiService _apiService = ApiService();
+  final StorageService _storageService = StorageService();
+
+  // State Variables
   bool _isLoading = false;
-  String _currentWorkerUrl = 'https://portfolio-chat-bridge.sheikwin10.workers.dev';
-  String _activeConsole = 'M365'; // Default starting view state
-
-  // Public Getters explicitly tracking UI demands
-  bool get isLoading => _isLoading;
-  String get currentWorkerUrl => _currentWorkerUrl;
-  String get activeConsole => _activeConsole;
-
-  // Multi-Tenant Infrastructure Map State Variables
+  String _activeConsole = 'M365';
   Map<String, dynamic> tenantMetrics = {};
   List<Map<String, dynamic>> infrastructureLogs = [];
 
-  void changeConsole(String consoleId) {
-    _activeConsole = consoleId;
-    notifyListeners();
+  // Getters
+  bool get isLoading => _isLoading;
+  String get activeConsole => _activeConsole;
+
+  DashboardProvider() {
+    _initializeProvider();
   }
 
-  Future<void> loadConfig() async {
+  Future<void> _initializeProvider() async {
+    // 1. Initialize High-Fidelity Dummy Data
     _generateHighFidelityDummyData();
-    notifyListeners();
+
+    // 2. Load persisted URL from StorageService
+    String? savedUrl = await _storageService.getWorkerUrl();
+    debugPrint("System Node URL: ${savedUrl ?? 'Using Default'}");
+
+    // 3. Start reactive streams
+    _startDataStreams();
   }
 
   void _generateHighFidelityDummyData() {
-    // High-fidelity Microsoft 365, Azure, Entra, and Veeam monitoring structures
     tenantMetrics = {
       "tenantName": "CloudNex Enterprise Solutions",
       "tenantId": "c0a80101-7b3c-44af-8123-dc101337afaa",
       "serverSpace": {"usedTB": 42.8, "totalTB": 64.0, "status": "Healthy"},
-      "backupServers": {"total": 12, "successful": 11, "failed": 1, "lastSync": "Just now"},
-      "securityScore": {"current": 84, "target": 95, "mfaEnabled": "98%"},
-      "entraId": {"users": 1245, "groups": 88, "syncStatus": "In Sync", "riskyUsers": 0, "appRegistrations": 14},
-      "intune": {"compliantDevices": 1102, "nonCompliant": 14, "totalDevices": 1116, "windows": 942, "iOS": 120, "android": 54},
-      "veeam": {"sobrCapacity": 84.5, "successRate": 99.2, "repoStatus": "Immutable"},
-      "azure": {"activeVMs": 8, "vnetStatus": "Connected", "monthlyBurn": "R 14,250"}
+      "backupServers": {"total": 12, "successful": 11, "failed": 1},
+      "entraId": {"users": 1245, "syncStatus": "In Sync"},
+      "intune": {"compliantDevices": 1102, "totalDevices": 1116},
+      "veeam": {"successRate": 99.2, "repoStatus": "Immutable"},
+      "azure": {"activeVMs": 8, "monthlyBurn": "R 14,250"},
+      "devices": 20,
+      "users": 100,
+      "backupStatus": "INITIALIZING..."
     };
-
-    infrastructureLogs = [
-      {
-        "category": "Intune",
-        "event": "Device Configuration Profile Enforcement",
-        "details": "Pushed BitLocker Encryption policy to 14 newly enrolled Windows 11 Endpoints.",
-        "status": "Success",
-        "timestamp": "10:14 AM"
-      },
-      {
-        "category": "Backup",
-        "event": "Veeam Replication Job: VM-PROD-SQL01",
-        "details": "Synthetic full backup completed. 1.2 TB processed. Target storage repository: On-Premise SAN.",
-        "status": "Success",
-        "timestamp": "09:30 AM"
-      },
-      {
-        "category": "Security",
-        "event": "Entra ID Identity Protection Alert",
-        "details": "Unfamiliar sign-in properties detected for user admin@cloudnex.co.za. Risk mitigated via conditional access MFA challenge.",
-        "status": "Warning",
-        "timestamp": "08:45 AM"
-      },
-      {
-        "category": "Infrastructure",
-        "event": "Hyper-V Cluster Node Storage Allocation",
-        "details": "Provisioned 500GB VHDX for automated dev environment sandbox pipeline.",
-        "status": "Success",
-        "timestamp": "07:12 AM"
-      }
-    ];
-  }
-
-  Future<void> updateWorkerUrl(String newUrl) async {
-    _currentWorkerUrl = newUrl;
     notifyListeners();
-    await refreshDashboard();
   }
 
-  Future<void> refreshDashboard() async {
+  void _startDataStreams() {
+    // Reactive Metrics Stream
+    _fakeService.getDashboardData().listen((data) {
+      tenantMetrics.addAll({
+        "devices": data['devices'],
+        "users": data['users'],
+        "backupStatus": data['backupStatus'],
+      });
+      notifyListeners();
+    });
+
+    // Reactive Log Stream (FIXED: Using DateTime instead of TimeOfDay)
+    _fakeService.getAlerts().listen((alert) {
+      final now = DateTime.now();
+      final timeString = "${now.hour}:${now.minute.toString().padLeft(2, '0')}";
+
+      infrastructureLogs.insert(0, {
+        "event": alert,
+        "timestamp": timeString,
+        "status": "Info"
+      });
+      
+      if (infrastructureLogs.length > 5) infrastructureLogs.removeLast();
+      notifyListeners();
+    });
+  }
+
+  Future<void> refreshRealTimeMetrics() async {
     _isLoading = true;
     notifyListeners();
+    try {
+      // Integration with your ApiService
+      final liveMetrics = await _apiService.fetchNodeMetrics();
+      debugPrint("Real-time sync successful: ${liveMetrics.runtimeType}");
+    } catch (e) {
+      debugPrint("Live Sync Error: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
-    // Minor cloud network emulation delay
-    await Future.delayed(const Duration(milliseconds: 400));
-    _generateHighFidelityDummyData();
-
-    _isLoading = false;
+  void changeConsole(String consoleId) {
+    _activeConsole = consoleId;
     notifyListeners();
   }
 }
