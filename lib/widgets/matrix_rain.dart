@@ -25,7 +25,7 @@ class _MatrixRainState extends State<MatrixRain> {
   List<int> speeds = [];
 
   final List<String> chars =
-      "010101ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#\$%&*+-/<>[]{}".split("");
+      "01ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#\$%&*+-/<>[]{}".split("");
 
   late double fontSize;
 
@@ -99,37 +99,52 @@ class MatrixPainter extends CustomPainter {
     required this.depth,
   });
 
+  final Random random = Random();
+
   @override
   void paint(Canvas canvas, Size size) {
-    // 💀 FIXED FADE (NO STACKING COLOR SHIFT)
     final fadePaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.08);
+      ..color = Colors.black.withValues(alpha: 0.06 + (progress * 0.04));
 
     canvas.drawRect(Offset.zero & size, fadePaint);
 
     for (int i = 0; i < drops.length; i++) {
-      double speedBoost = progress * 1.1;
+      double speedBoost = (progress * 2.5) + (depth * 0.5);
 
       drops[i] += speeds[i] + speedBoost;
 
       if (drops[i] * fontSize > size.height &&
-          Random().nextDouble() > 0.97) {
+          random.nextDouble() > (0.96 - progress * 0.03)) {
         drops[i] = 0;
       }
 
-      int trailLength = depth > 0.5 ? 10 : 6;
+      int trailLength = (depth > 0.5 ? 12 : 7) + (progress * 5).toInt();
+
+      bool glitch = random.nextDouble() > 0.995 - (progress * 0.003);
 
       for (int trail = 0; trail < trailLength; trail++) {
         int y = (drops[i] - trail).toInt();
         if (y < 0) continue;
 
-        String char = chars[(i + trail) % chars.length];
+        String char = chars[random.nextInt(chars.length)];
 
-        double opacity = (1 - (trail / trailLength)).clamp(0.1, 1.0);
+        double opacity =
+            (1 - (trail / trailLength)).clamp(0.05, 1.0);
 
-        // ⚡ FIXED COLOR (NO LERP = NO CYAN SHIFT)
-        final color = const Color(0xFF39FF14)
-            .withValues(alpha: opacity);
+        double pulse =
+            (progress > 0.85 ? (1 + sin(progress * 20) * 0.3) : 1);
+
+        Color color;
+
+        if (glitch && trail == 0) {
+          color = Colors.white.withValues(alpha: 0.9);
+        } else if (trail == 0) {
+          color = const Color(0xFF39FF14)
+              .withValues(alpha: opacity * pulse);
+        } else {
+          color = const Color(0xFF39FF14)
+              .withValues(alpha: opacity * 0.7);
+        }
 
         final textPainter = TextPainter(
           text: TextSpan(
