@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/matrix_rain.dart';
 import '../widgets/app_header.dart';
 import '../widgets/cyber_fx_layer.dart';
-import '../widgets/glitch_transition.dart';
 
 import 'dashboard_screen.dart';
 import 'veeam_screen.dart';
@@ -61,18 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.cyanAccent,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard), label: "Dash"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.storage), label: "Veeam"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.cloud), label: "Azure"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.verified_user), label: "Entra"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.devices), label: "Intune"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.account_tree), label: "AD"),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Dash"),
+          BottomNavigationBarItem(icon: Icon(Icons.storage), label: "Veeam"),
+          BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Azure"),
+          BottomNavigationBarItem(icon: Icon(Icons.verified_user), label: "Entra"),
+          BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Intune"),
+          BottomNavigationBarItem(icon: Icon(Icons.account_tree), label: "AD"),
         ],
       ),
 
@@ -105,16 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
               AppHeader(title: _titles[_currentIndex]),
 
               Expanded(
-                child: GlitchTransition(
-                  active: _hackMode > 0,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: KeyedSubtree(
-                      key: ValueKey(_currentIndex),
-                      child: _screens[_currentIndex],
-                    ),
-                  ),
-                ),
+                child: _screens[_currentIndex],
               ),
             ],
           ),
