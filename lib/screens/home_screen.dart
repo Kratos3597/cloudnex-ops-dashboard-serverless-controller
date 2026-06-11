@@ -30,11 +30,11 @@ class _HomeScreenState extends State<HomeScreen>
 
 final List<Widget> _screens = [
   const DashboardScreen(),
-  const DashboardScreen(),
-  const DashboardScreen(),
-  const DashboardScreen(),
-  const DashboardScreen(),
-  const DashboardScreen(),
+  const VeeamScreen(),
+  const AzureScreen(),
+  const EntraScreen(),
+  const IntuneScreen(),
+  const ADScreen(),
 ];
 
   final List<String> _titles = const [
