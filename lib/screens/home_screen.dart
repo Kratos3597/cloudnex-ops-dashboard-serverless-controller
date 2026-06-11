@@ -50,22 +50,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CyberpunkTheme.bgDark,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabChanged,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: CyberpunkTheme.bgCard,
-        selectedItemColor: CyberpunkTheme.neonBlue,
-        unselectedItemColor: CyberpunkTheme.textMuted,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Dash"),
-          BottomNavigationBarItem(icon: Icon(Icons.storage), label: "Veeam"),
-          BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Azure"),
-          BottomNavigationBarItem(icon: Icon(Icons.verified_user), label: "Entra"),
-          BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Intune"),
-          BottomNavigationBarItem(icon: Icon(Icons.account_tree), label: "AD"),
-        ],
+      extendBody: true, // IMPORTANT: Allows body to extend behind the navigation bar
+      backgroundColor: Colors.transparent,
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.transparent, // Forces background transparency
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: _onTabChanged,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent, // Navigation bar background
+          elevation: 0, // Removes shadow
+          selectedItemColor: CyberpunkTheme.neonBlue,
+          unselectedItemColor: CyberpunkTheme.textMuted,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Dash"),
+            BottomNavigationBarItem(icon: Icon(Icons.storage), label: "Veeam"),
+            BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Azure"),
+            BottomNavigationBarItem(icon: Icon(Icons.verified_user), label: "Entra"),
+            BottomNavigationBarItem(icon: Icon(Icons.devices), label: "Intune"),
+            BottomNavigationBarItem(icon: Icon(Icons.account_tree), label: "AD"),
+          ],
+        ),
       ),
       body: Stack(
         children: [
