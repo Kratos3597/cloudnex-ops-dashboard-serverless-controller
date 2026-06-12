@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/console_tile.dart'; // Ensure you have this file created
+import 'dart:math';
+import '../widgets/console_tile.dart'; 
 import '../theme/cyberpunk_theme.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -13,6 +14,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int devices = 20;
   int users = 100;
   String backupStatus = "OK";
+  
+  // Data for sparklines (History of 10 points)
+  Map<String, List<double>> telemetry = {
+    "Backup": List.generate(10, (index) => Random().nextDouble()),
+    "Azure": List.generate(10, (index) => Random().nextDouble()),
+    "Server 01": List.generate(10, (index) => Random().nextDouble()),
+    "Users": List.generate(10, (index) => Random().nextDouble()),
+  };
 
   List<String> alerts = [
     "✅ Backup completed successfully",
@@ -20,7 +29,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     "✅ Azure services operational",
   ];
 
-  // Action Menu logic
+  void addSystemLog(String message) {
+    setState(() {
+      String timestamp = DateTime.now().toString().substring(11, 19);
+      alerts.insert(0, "[$timestamp] $message");
+      if (alerts.length > 6) alerts.removeLast();
+    });
+  }
+
   void showActionMenu(BuildContext context, String targetName) {
     showModalBottomSheet(
       context: context,
@@ -32,9 +48,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text("MANAGE: $targetName", style: const TextStyle(color: Colors.cyanAccent, fontSize: 18)),
             const Divider(color: Colors.white24),
-            ListTile(leading: const Icon(Icons.wifi, color: Colors.white), title: const Text("Ping", style: TextStyle(color: Colors.white)), onTap: () => print("Pinging...")),
-            ListTile(leading: const Icon(Icons.refresh, color: Colors.white), title: const Text("Restart Service", style: TextStyle(color: Colors.white)), onTap: () => print("Restarting...")),
-            ListTile(leading: const Icon(Icons.map, color: Colors.white), title: const Text("Traceroute", style: TextStyle(color: Colors.white)), onTap: () => print("Tracing...")),
+            ListTile(
+              leading: const Icon(Icons.wifi, color: Colors.white), 
+              title: const Text("Ping", style: TextStyle(color: Colors.white)), 
+              onTap: () {
+                Navigator.pop(context);
+                addSystemLog("📡 Pinging $targetName...");
+                Future.delayed(const Duration(seconds: 1), () => addSystemLog("✅ $targetName responded (12ms)"));
+              }
+            ),
+            ListTile(
+              leading: const Icon(Icons.refresh, color: Colors.white), 
+              title: const Text("Restart Service", style: TextStyle(color: Colors.white)), 
+              onTap: () {
+                Navigator.pop(context);
+                addSystemLog("⚠️ Restarting $targetName...");
+                Future.delayed(const Duration(seconds: 2), () => addSystemLog("✅ $targetName: Service Restarted."));
+              }
+            ),
           ],
         ),
       ),
@@ -52,16 +83,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (devices > 40) devices = 20;
         if (users > 150) users = 100;
 
-        if (devices % 5 == 0) {
-          backupStatus = "WARNING";
-          alerts.insert(0, "⚠ Backup delay detected");
-        } else if (devices % 7 == 0) {
-          backupStatus = "CRITICAL";
-          alerts.insert(0, "❌ Backup failed!");
-        } else {
-          backupStatus = "OK";
+        // Update telemetry data
+        for (var key in telemetry.keys) {
+          telemetry[key]!.removeAt(0);
+          telemetry[key]!.add(Random().nextDouble());
         }
-        if (alerts.length > 5) alerts.removeLast();
+
+        if (devices % 5 == 0) backupStatus = "WARNING";
+        else if (devices % 7 == 0) backupStatus = "CRITICAL";
+        else backupStatus = "OK";
       });
     });
   }
@@ -111,31 +141,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             physics: const NeverScrollableScrollPhysics(),
             children: [
               ConsoleTile(
-                title: "Backup", 
-                value: backupStatus, 
-                icon: Icons.storage, 
+                title: "Backup", value: backupStatus, icon: Icons.storage, 
                 color: getStatusColor(backupStatus), 
+                sparklineData: telemetry["Backup"],
                 onTap: () => showActionMenu(context, "Backup System")
               ),
               ConsoleTile(
-                title: "Azure", 
-                value: "ONLINE", 
-                icon: Icons.cloud, 
+                title: "Azure", value: "ONLINE", icon: Icons.cloud, 
                 color: Colors.cyanAccent, 
+                sparklineData: telemetry["Azure"],
                 onTap: () => showActionMenu(context, "Azure Cloud")
               ),
               ConsoleTile(
-                title: "Server 01", 
-                value: "ONLINE", 
-                icon: Icons.dns, 
+                title: "Server 01", value: "ONLINE", icon: Icons.dns, 
                 color: Colors.greenAccent, 
+                sparklineData: telemetry["Server 01"],
                 onTap: () => showActionMenu(context, "Server 01")
               ),
               ConsoleTile(
-                title: "Users", 
-                value: "$users", 
-                icon: Icons.group, 
+                title: "Users", value: "$users", icon: Icons.group, 
                 color: Colors.orangeAccent, 
+                sparklineData: telemetry["Users"],
                 onTap: () => showActionMenu(context, "Active Users")
               ),
             ],
