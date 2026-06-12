@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/console_tile.dart';
 
 class EntraScreen extends StatefulWidget {
   const EntraScreen({super.key});
@@ -17,12 +18,31 @@ class _EntraScreenState extends State<EntraScreen> {
 
   String searchQuery = "";
 
-  @override
-  void initState() {
-    super.initState();
-    Stream.periodic(const Duration(seconds: 4)).listen((_) {
-      if (mounted) setState(() => users.shuffle());
-    });
+  void showActionMenu(BuildContext context, Map<String, dynamic> user) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black.withValues(alpha: 0.95),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("IDENTITY: ${user['name']}", style: const TextStyle(color: Colors.cyanAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(color: Colors.white24),
+            ListTile(
+              leading: const Icon(Icons.security, color: Colors.white),
+              title: const Text("View Audit Logs", style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: Icon(user['status'] == "Enabled" ? Icons.block : Icons.check_circle, color: Colors.white),
+              title: Text(user['status'] == "Enabled" ? "Disable Account" : "Enable Account", style: const TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Color getRoleColor(String role) {
@@ -34,9 +54,6 @@ class _EntraScreenState extends State<EntraScreen> {
     }
   }
 
-  Color getStatusColor(String status) =>
-      status == "Enabled" ? Colors.greenAccent : Colors.redAccent;
-
   @override
   Widget build(BuildContext context) {
     final filteredUsers = users
@@ -45,53 +62,35 @@ class _EntraScreenState extends State<EntraScreen> {
 
     return Column(
       children: [
-        // 🔍 SEARCH BAR
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(8.0),
           child: TextField(
             style: const TextStyle(color: Colors.white),
+            onChanged: (v) => setState(() => searchQuery = v),
             decoration: InputDecoration(
-              hintText: "Search users...",
+              hintText: "Search Entra ID users...",
               hintStyle: const TextStyle(color: Colors.white38),
               prefixIcon: const Icon(Icons.search, color: Colors.cyanAccent),
               filled: true,
               fillColor: Colors.black.withValues(alpha: 0.4),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             ),
-            onChanged: (value) => setState(() => searchQuery = value),
           ),
         ),
-
-        // 👤 USER LIST
         Expanded(
           child: ListView.builder(
+            padding: const EdgeInsets.all(8),
             itemCount: filteredUsers.length,
-            itemBuilder: (context, index) {
-              final user = filteredUsers[index];
-              Color roleColor = getRoleColor(user["role"]);
-              Color statusColor = getStatusColor(user["status"]);
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: roleColor.withValues(alpha: 0.5)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: roleColor, size: 32),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(user["name"], style: TextStyle(color: roleColor, fontWeight: FontWeight.bold)),
-                        Text("Role: ${user["role"]}", style: const TextStyle(color: Colors.white70)),
-                        Text("Status: ${user["status"]}", style: TextStyle(color: statusColor)),
-                      ],
-                    ),
-                  ],
+            itemBuilder: (_, i) {
+              final user = filteredUsers[i];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ConsoleTile(
+                  title: user["name"],
+                  value: "Role: ${user["role"]} | Status: ${user["status"]}",
+                  icon: Icons.person_pin,
+                  color: getRoleColor(user["role"]),
+                  onTap: () => showActionMenu(context, user),
                 ),
               );
             },

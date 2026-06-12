@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/console_tile.dart';
 
 class VeeamScreen extends StatefulWidget {
   const VeeamScreen({super.key});
@@ -22,7 +23,7 @@ class _VeeamScreenState extends State<VeeamScreen> {
       setState(() {
         for (var job in jobs) {
           if (job["status"] == "RUNNING") {
-            job["progress"] += 10;
+            job["progress"] += 5;
             if (job["progress"] >= 100) {
               job["progress"] = 100;
               job["status"] = "OK";
@@ -42,42 +43,57 @@ class _VeeamScreenState extends State<VeeamScreen> {
     }
   }
 
-  Widget buildJobCard(Map<String, dynamic> job) {
-    Color color = getStatusColor(job["status"]);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(job["name"], style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
-              Text(job["status"], style: TextStyle(color: color)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(value: job["progress"] / 100, color: color, backgroundColor: Colors.white10),
-          const SizedBox(height: 8),
-          Text("${job["progress"]}%", style: const TextStyle(color: Colors.white70)),
-        ],
+  // Reuse the Action Menu logic (Ideally move this to a mixin or helper)
+  void showActionMenu(BuildContext context, String jobName) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black.withValues(alpha: 0.95),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("JOB: $jobName", style: const TextStyle(color: Colors.cyanAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(color: Colors.white24),
+            ListTile(
+              leading: const Icon(Icons.play_arrow, color: Colors.white), 
+              title: const Text("Retry Job", style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.stop_circle, color: Colors.white), 
+              title: const Text("Abort Task", style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.description, color: Colors.white), 
+              title: const Text("View Full Logs", style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Only return the list structure, no Scaffold or Stack here!
-    return ListView(
-      children: [
-        ...jobs.map((job) => buildJobCard(job)),
-      ],
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: jobs.length,
+      itemBuilder: (context, index) {
+        final job = jobs[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: ConsoleTile(
+            title: job["name"],
+            value: "${job["status"]} (${job["progress"]}%)",
+            icon: Icons.backup,
+            color: getStatusColor(job["status"]),
+            onTap: () => showActionMenu(context, job["name"]),
+          ),
+        );
+      },
     );
   }
 }

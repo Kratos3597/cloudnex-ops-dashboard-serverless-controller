@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/console_tile.dart';
 
 class AzureScreen extends StatefulWidget {
   const AzureScreen({super.key});
@@ -16,6 +17,34 @@ class _AzureScreenState extends State<AzureScreen> {
   ];
 
   String subscription = "Production Subscription";
+
+  // Reusing the action menu logic
+  void showActionMenu(BuildContext context, String serviceName) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black.withValues(alpha: 0.95),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("AZURE: $serviceName", style: const TextStyle(color: Colors.cyanAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(color: Colors.white24),
+            ListTile(
+              leading: const Icon(Icons.play_circle, color: Colors.white),
+              title: const Text("Start Service", style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.white),
+              title: const Text("Configure Instance", style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -42,64 +71,45 @@ class _AzureScreenState extends State<AzureScreen> {
     }
   }
 
-  Widget buildServiceCard(Map<String, dynamic> service) {
-    Color color = getStatusColor(service["status"]);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.cloud, color: color, size: 36),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(service["name"], style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
-              Text("${service["count"]} resources", style: const TextStyle(color: Colors.white70)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget subscriptionHeader() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.account_tree, color: Colors.cyanAccent, size: 36),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("SUBSCRIPTION", style: TextStyle(color: Colors.white70, fontSize: 12)),
-              Text(subscription, style: const TextStyle(color: Colors.cyanAccent, fontSize: 18, fontWeight: FontWeight.bold)),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Returning only the content structure ensures it sits correctly inside the TerminalShell
     return ListView(
+      padding: const EdgeInsets.all(8),
       children: [
-        subscriptionHeader(),
-        ...services.map((service) => buildServiceCard(service)),
+        // Subscription Header
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.account_tree, color: Colors.cyanAccent, size: 36),
+              const SizedBox(width: 15),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("SUBSCRIPTION", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text(subscription, style: const TextStyle(color: Colors.cyanAccent, fontSize: 16, fontWeight: FontWeight.bold)),
+                ],
+              )
+            ],
+          ),
+        ),
+        // Service List
+        ...services.map((service) => Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: ConsoleTile(
+            title: service["name"],
+            value: "${service["count"]} Resources | ${service["status"]}",
+            icon: Icons.cloud,
+            color: getStatusColor(service["status"]),
+            onTap: () => showActionMenu(context, service["name"]),
+          ),
+        )),
       ],
     );
   }
