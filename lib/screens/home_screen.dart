@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/matrix_rain.dart';
-import '../widgets/app_header.dart';
 import '../widgets/cyber_fx_layer.dart';
 import '../theme/cyberpunk_theme.dart';
 import '../widgets/terminal_shell.dart';
@@ -32,15 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ADScreen(),
   ];
 
-  final List<String> _titles = const [
-    "Dashboard",
-    "Veeam Backup",
-    "Azure",
-    "Entra ID",
-    "Intune",
-    "Active Directory",
-  ];
-
   void _onTabChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -50,18 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // IMPORTANT: Allows body to extend behind the navigation bar
+      extendBody: true,
       backgroundColor: Colors.transparent,
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Colors.transparent, // Forces background transparency
+          canvasColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: _onTabChanged,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent, // Navigation bar background
-          elevation: 0, // Removes shadow
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           selectedItemColor: CyberpunkTheme.neonBlue,
           unselectedItemColor: CyberpunkTheme.textMuted,
           items: const [
@@ -101,18 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // 5. 📱 MAIN CONTENT SHELL
           SafeArea(
-            child: Column(
-              children: [
-                AppHeader(title: _titles[_currentIndex]),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: TerminalShell(
-                      child: _screens[_currentIndex],
-                    ),
-                  ),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TerminalShell(
+                child: _screens[_currentIndex],
+              ),
             ),
           ),
         ],
