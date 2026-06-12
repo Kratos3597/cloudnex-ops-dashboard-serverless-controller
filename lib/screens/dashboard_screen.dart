@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/neon_card.dart';
+import '../widgets/console_tile.dart'; // Ensure you have this file created
 import '../theme/cyberpunk_theme.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -19,6 +19,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     "⚠ Device non-compliant detected",
     "✅ Azure services operational",
   ];
+
+  // Action Menu logic
+  void showActionMenu(BuildContext context, String targetName) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("MANAGE: $targetName", style: const TextStyle(color: Colors.cyanAccent, fontSize: 18)),
+            const Divider(color: Colors.white24),
+            ListTile(leading: const Icon(Icons.wifi, color: Colors.white), title: const Text("Ping", style: TextStyle(color: Colors.white)), onTap: () => print("Pinging...")),
+            ListTile(leading: const Icon(Icons.refresh, color: Colors.white), title: const Text("Restart Service", style: TextStyle(color: Colors.white)), onTap: () => print("Restarting...")),
+            ListTile(leading: const Icon(Icons.map, color: Colors.white), title: const Text("Traceroute", style: TextStyle(color: Colors.white)), onTap: () => print("Tracing...")),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -89,10 +110,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSpacing: 10,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              NeonCard(title: "Backup", value: backupStatus, icon: Icons.storage, color: getStatusColor(backupStatus)),
-              const NeonCard(title: "Azure", value: "ONLINE", icon: Icons.cloud, color: Colors.cyanAccent),
-              NeonCard(title: "Devices", value: "$devices", icon: Icons.devices, color: Colors.purpleAccent),
-              NeonCard(title: "Users", value: "$users", icon: Icons.group, color: Colors.orangeAccent),
+              ConsoleTile(
+                title: "Backup", 
+                value: backupStatus, 
+                icon: Icons.storage, 
+                color: getStatusColor(backupStatus), 
+                onTap: () => showActionMenu(context, "Backup System")
+              ),
+              ConsoleTile(
+                title: "Azure", 
+                value: "ONLINE", 
+                icon: Icons.cloud, 
+                color: Colors.cyanAccent, 
+                onTap: () => showActionMenu(context, "Azure Cloud")
+              ),
+              ConsoleTile(
+                title: "Server 01", 
+                value: "ONLINE", 
+                icon: Icons.dns, 
+                color: Colors.greenAccent, 
+                onTap: () => showActionMenu(context, "Server 01")
+              ),
+              ConsoleTile(
+                title: "Users", 
+                value: "$users", 
+                icon: Icons.group, 
+                color: Colors.orangeAccent, 
+                onTap: () => showActionMenu(context, "Active Users")
+              ),
             ],
           ),
           alertPanel(),
