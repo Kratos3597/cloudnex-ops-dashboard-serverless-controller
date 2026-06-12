@@ -1,36 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/cyberpunk_theme.dart';
-import '../widgets/terminal_shell.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // The body is where the Stack goes
-      body: Stack(
-        children: [
-          // 1. Background Layer (drawn first)
-          CyberpunkTheme.backgroundLayer(), 
-          
-          // 2. Terminal Shell (drawn on top)
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TerminalShell(
-                child: Text(
-                  "SYSTEM INITIALIZED\nWelcome, Mohammed Sheik.", 
-                  style: TextStyle(color: CyberpunkTheme.textLight)
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 class VeeamScreen extends StatefulWidget {
   const VeeamScreen({super.key});
 
@@ -48,13 +17,12 @@ class _VeeamScreenState extends State<VeeamScreen> {
   @override
   void initState() {
     super.initState();
-
     Stream.periodic(const Duration(seconds: 2)).listen((_) {
+      if (!mounted) return;
       setState(() {
         for (var job in jobs) {
           if (job["status"] == "RUNNING") {
             job["progress"] += 10;
-
             if (job["progress"] >= 100) {
               job["progress"] = 100;
               job["status"] = "OK";
@@ -67,109 +35,37 @@ class _VeeamScreenState extends State<VeeamScreen> {
 
   Color getStatusColor(String status) {
     switch (status) {
-      case "OK":
-        return Colors.greenAccent;
-      case "RUNNING":
-        return Colors.orangeAccent;
-      case "FAILED":
-        return Colors.redAccent;
-      default:
-        return Colors.cyanAccent;
+      case "OK": return Colors.greenAccent;
+      case "RUNNING": return Colors.orangeAccent;
+      case "FAILED": return Colors.redAccent;
+      default: return Colors.cyanAccent;
     }
   }
 
   Widget buildJobCard(Map<String, dynamic> job) {
     Color color = getStatusColor(job["status"]);
-
     return Container(
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black,
+        color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.6), // ✅ fixed
-            blurRadius: 12,
-          )
-        ],
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔥 Job header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                job["name"],
-                style: TextStyle(
-                  color: color,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                job["status"],
-                style: TextStyle(color: color),
-              ),
+              Text(job["name"], style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(job["status"], style: TextStyle(color: color)),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // 🔥 Progress
-          LinearProgressIndicator(
-            value: job["progress"] / 100,
-            color: color,
-            backgroundColor: Colors.white10,
-          ),
-
+          LinearProgressIndicator(value: job["progress"] / 100, color: color, backgroundColor: Colors.white10),
           const SizedBox(height: 8),
-
-          Text(
-            "${job["progress"]}%",
-            style: const TextStyle(color: Colors.white70),
-          ),
-
-          const SizedBox(height: 10),
-
-          // 🔥 Buttons
-          Row(
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.cyanAccent,
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Restoring ${job["name"]}..."),
-                    ),
-                  );
-                },
-                child: const Text("Restore"),
-              ),
-
-              const SizedBox(width: 10),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Stopping ${job["name"]}..."),
-                    ),
-                  );
-                },
-                child: const Text("Stop"),
-              ),
-            ],
-          ),
+          Text("${job["progress"]}%", style: const TextStyle(color: Colors.white70)),
         ],
       ),
     );
@@ -177,21 +73,11 @@ class _VeeamScreenState extends State<VeeamScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent, // ✅ important
-      body: Stack(
-        children: [
-          CyberpunkTheme.backgroundLayer(), // ✅ global background
-
-          SafeArea(
-            child: ListView(
-              children: [
-                ...jobs.map((job) => buildJobCard(job)), // ✅ fixed
-              ],
-            ),
-          ),
-        ],
-      ),
+    // Only return the list structure, no Scaffold or Stack here!
+    return ListView(
+      children: [
+        ...jobs.map((job) => buildJobCard(job)),
+      ],
     );
   }
 }

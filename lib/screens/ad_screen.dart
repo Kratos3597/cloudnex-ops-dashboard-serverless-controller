@@ -1,36 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/cyberpunk_theme.dart';
-import '../widgets/terminal_shell.dart';
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // The body is where the Stack goes
-      body: Stack(
-        children: [
-          // 1. Background Layer (drawn first)
-          CyberpunkTheme.backgroundLayer(), 
-          
-          // 2. Terminal Shell (drawn on top)
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TerminalShell(
-                child: Text(
-                  "SYSTEM INITIALIZED\nWelcome, Mohammed Sheik.", 
-                  style: TextStyle(color: CyberpunkTheme.textLight)
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class ADScreen extends StatefulWidget {
   const ADScreen({super.key});
@@ -40,7 +8,7 @@ class ADScreen extends StatefulWidget {
 }
 
 class _ADScreenState extends State<ADScreen> {
-  List<Map<String, dynamic>> users = [
+  final List<Map<String, dynamic>> users = [
     {"name": "Alice Admin", "group": "IT Admins", "status": "Active"},
     {"name": "Bob User", "group": "Employees", "status": "Active"},
     {"name": "Charlie Guest", "group": "Guests", "status": "Disabled"},
@@ -51,91 +19,70 @@ class _ADScreenState extends State<ADScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredUsers = users
-        .where((u) =>
-            u["name"].toLowerCase().contains(searchQuery.toLowerCase()))
+        .where((u) => u["name"].toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [
-              Color(0xFF05050A),
-              Colors.black,
-            ],
-            radius: 1.2,
+    return Column(
+      children: [
+        // 🔍 SEARCH BAR
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: TextField(
+            style: const TextStyle(color: Colors.white),
+            onChanged: (v) => setState(() => searchQuery = v),
+            decoration: InputDecoration(
+              hintText: "Search users...",
+              hintStyle: const TextStyle(color: Colors.white38),
+              filled: true,
+              fillColor: Colors.black.withValues(alpha: 0.4),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
 
-              // 🔍 SEARCH BAR
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: TextField(
-                  style: const TextStyle(color: Colors.white),
-                  onChanged: (v) => setState(() => searchQuery = v),
-                  decoration: InputDecoration(
-                    hintText: "Search users...",
-                    hintStyle: const TextStyle(color: Colors.white38),
-                    filled: true,
-                    fillColor: Colors.black.withOpacity(0.4),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+        // 📋 LIST
+        Expanded(
+          child: ListView.builder(
+            itemCount: filteredUsers.length,
+            itemBuilder: (_, i) {
+              final user = filteredUsers[i];
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.greenAccent.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    user["name"],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    user["group"],
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  trailing: Text(
+                    user["status"],
+                    style: TextStyle(
+                      color: user["status"] == "Active"
+                          ? Colors.greenAccent
+                          : Colors.redAccent,
                     ),
                   ),
                 ),
-              ),
-
-              // 📋 LIST
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filteredUsers.length,
-                  itemBuilder: (_, i) {
-                    final user = filteredUsers[i];
-
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.greenAccent.withOpacity(0.3),
-                        ),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          user["name"],
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        subtitle: Text(
-                          user["group"],
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        trailing: Text(
-                          user["status"],
-                          style: TextStyle(
-                            color: user["status"] == "Active"
-                                ? Colors.greenAccent
-                                : Colors.redAccent,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
-      ),
+      ],
     );
   }
 }
