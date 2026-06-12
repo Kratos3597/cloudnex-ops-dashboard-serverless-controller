@@ -18,7 +18,6 @@ class _AzureScreenState extends State<AzureScreen> {
 
   String subscription = "Production Subscription";
 
-  // Reusing the action menu logic
   void showActionMenu(BuildContext context, String serviceName) {
     showModalBottomSheet(
       context: context,
@@ -89,12 +88,19 @@ class _AzureScreenState extends State<AzureScreen> {
             children: [
               const Icon(Icons.account_tree, color: Colors.cyanAccent, size: 36),
               const SizedBox(width: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("SUBSCRIPTION", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                  Text(subscription, style: const TextStyle(color: Colors.cyanAccent, fontSize: 16, fontWeight: FontWeight.bold)),
-                ],
+              // FIX: Expanded ensures the column doesn't overflow
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("SUBSCRIPTION", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text(
+                      subscription, 
+                      style: const TextStyle(color: Colors.cyanAccent, fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               )
             ],
           ),

@@ -87,7 +87,8 @@ class _EntraScreenState extends State<EntraScreen> {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: ConsoleTile(
                   title: user["name"],
-                  value: "Role: ${user["role"]} | Status: ${user["status"]}",
+                  // Reduced text length to prevent overflow in the box
+                  value: "${user["role"]} | ${user["status"]}",
                   icon: Icons.person_pin,
                   color: getRoleColor(user["role"]),
                   onTap: () => showActionMenu(context, user),
